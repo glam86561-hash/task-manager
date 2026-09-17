@@ -44551,6 +44551,57 @@
 		window.updateToggleUI = updateToggleUI;            // 核心修复
 		window.onNotifyModeChange = onNotifyModeChange;    // 核心修复
 
+		// ★ 核心修复：总开关的 onchange 函数（原先缺失的）
+        function toggleNotifyEnabled(isChecked) {
+            localStorage.setItem(NOTIF_KEY, isChecked ? 'true' : 'false');
+            updateToggleUI(isChecked);
+            
+            if (isChecked) {
+                // 尝试申请权限
+                if (Notification.permission !== 'granted') {
+                    Notification.requestPermission().then(function(perm) {
+                        if (perm === 'granted') {
+                            localStorage.setItem(NOTIF_KEY, 'true');
+                            updateToggleUI(true);
+                            startNotifyScheduler();
+                            if (typeof toast === 'function') toast('🔔 桌面通知已开启');
+                        } else {
+                            localStorage.setItem(NOTIF_KEY, 'false');
+                            updateToggleUI(false);
+                            if (typeof toast === 'function') toast('⚠️ 浏览器权限被拒绝，请在浏览器设置中允许通知');
+                        }
+                    });
+                } else {
+                    startNotifyScheduler();
+                    if (typeof toast === 'function') toast('🔔 桌面通知已开启');
+                }
+            } else {
+                // 关闭心跳轮询和定时器
+                clearScheduler();
+                if (typeof toast === 'function') toast('🔕 桌面通知已关闭');
+            }
+        }
+        window.toggleNotifyEnabled = toggleNotifyEnabled; // ★ 暴露到全局
+
+        // 动态更新开关UI样式的函数（补充这个以防遗漏）
+        function updateToggleUI(isEnabled) {
+            var toggle = document.getElementById('notifyMasterToggle');
+            if (!toggle) return;
+            toggle.checked = isEnabled;
+            var span = toggle.nextElementSibling; 
+            var knob = span ? span.nextElementSibling : null; 
+            if (span && knob) {
+                if (isEnabled) {
+                    span.style.backgroundColor = '#3b82f6';
+                    knob.style.transform = 'translateX(20px)';
+                } else {
+                    span.style.backgroundColor = '#cbd5e1';
+                    knob.style.transform = 'translateX(0)';
+                }
+            }
+        }
+        window.updateToggleUI = updateToggleUI; // ★ 暴露到全局
+
         setTimeout(function () {
             if (Notification.permission === 'granted' && localStorage.getItem(NOTIF_KEY) !== 'false') {
                 startNotifyScheduler();
