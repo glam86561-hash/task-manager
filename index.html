@@ -44544,12 +44544,12 @@
         }
 
         window.requestDesktopNotification = requestDesktopNotification;
-        window.checkAndNotifyTasks = doNotify;
-        window.startNotifyScheduler = startNotifyScheduler;
+		window.checkAndNotifyTasks = doNotify;
+		window.startNotifyScheduler = startNotifyScheduler;
 		window.NOTIF_KEY = NOTIF_KEY;
-        window.toggleNotifyEnabled = toggleNotifyEnabled;
-        window.updateToggleUI = updateToggleUI;
-        window.onNotifyModeChange = onNotifyModeChange;
+		window.toggleNotifyEnabled = toggleNotifyEnabled;  // 核心修复
+		window.updateToggleUI = updateToggleUI;            // 核心修复
+		window.onNotifyModeChange = onNotifyModeChange;    // 核心修复
 
         setTimeout(function () {
             if (Notification.permission === 'granted' && localStorage.getItem(NOTIF_KEY) !== 'false') {
