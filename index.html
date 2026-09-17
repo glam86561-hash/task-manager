@@ -44546,6 +44546,10 @@
         window.requestDesktopNotification = requestDesktopNotification;
         window.checkAndNotifyTasks = doNotify;
         window.startNotifyScheduler = startNotifyScheduler;
+		window.NOTIF_KEY = NOTIF_KEY;
+        window.toggleNotifyEnabled = toggleNotifyEnabled;
+        window.updateToggleUI = updateToggleUI;
+        window.onNotifyModeChange = onNotifyModeChange;
 
         setTimeout(function () {
             if (Notification.permission === 'granted' && localStorage.getItem(NOTIF_KEY) !== 'false') {
