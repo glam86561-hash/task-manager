@@ -23747,8 +23747,16 @@
             const start = range.start;
             const end = range.end;
 
-            // 2. 根据 statsMode 筛选任务（计划/实际）
-            const allTasks = tasks.filter(t => !t.deleted);
+            // ★ 核心修复：读取当前负责人筛选
+            const assignee = assigneeFilter || 'all';
+
+            // 2. 根据 statsMode 筛选任务（计划/实际），并同步过滤负责人
+            const allTasks = tasks.filter(t => {
+                if (t.deleted) return false;
+                if (assignee !== 'all' && (t.assignee || '未分配') !== assignee) return false;
+                return true;
+            });
+
             const list = allTasks.filter(task => {
                 if (statsMode === 'completion') {
                     // 实际完成口径：已完成任务按完成日归属，未完成任务按截止日归属（与周期重叠）
@@ -23768,9 +23776,7 @@
             const done = list.filter(t => t.completed).length;
             const rate = total === 0 ? 0 : Math.round((done / total) * 100);
 
-            // 4. 统计各季度完成数和总任务数（按截止日或完成日？需与 list 一致）
-            //    季度归属：使用 task.endDate 还是 task.completedDate？依据 statsMode：
-            //    计划口径：用 endDate；实际口径：用 completedDate（已完成）或 endDate（未完成）
+            // 4. 统计各季度完成数和总任务数
             const quarters = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
             const quarterTotal = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
 
@@ -23789,6 +23795,7 @@
                 else if (month >= 3 && month <= 5) q = 'Q2';
                 else if (month >= 6 && month <= 8) q = 'Q3';
                 else if (month >= 9 && month <= 11) q = 'Q4';
+                
                 quarterTotal[q] = (quarterTotal[q] || 0) + 1;
                 if (task.completed) {
                     quarters[q] = (quarters[q] || 0) + 1;
@@ -23802,7 +23809,8 @@
                 const totalQ = quarterTotal[q] || 0;
                 const doneQ = quarters[q] || 0;
                 const rateQ = totalQ === 0 ? 0 : Math.round((doneQ / totalQ) * 100);
-                // 更新完成率标签（如果有）
+                
+                // 更新完成率标签
                 const pctEl = document.getElementById('pct' + q);
                 if (pctEl) {
                     if (totalQ === 0) {
@@ -23850,7 +23858,7 @@
                     barEl.style.height = height + 'px';
                     const parent = barEl.closest('.bar-group');
                     if (parent) {
-                        parent.classList.toggle('highlight', id === 'barQ3'); // 示例，可根据需要调整
+                        parent.classList.toggle('highlight', id === 'barQ3'); 
                     }
                 }
                 if (valEl) {
@@ -24177,30 +24185,39 @@
         // ★★★ 团队完成质量渲染（本季度专用） ★★★
         // ================================================================
         function renderTeamQuality() {
-            // ---- 1. 从 TEAM 数组获取所有成员（排除未分配） ----
+            // ★ 核心修复1：获取当前季度的日期范围
+            const range = getModeRange(currentMode); // currentMode 此时是 'quarter'
+            const assignee = assigneeFilter || 'all';
+
+            // ★ 核心修复2：在统计前，严格过滤任务（未删除、属于本季度、符合负责人筛选）
+            const taskList = tasks.filter(t => {
+                if (t.deleted) return false;
+                if (assignee !== 'all' && (t.assignee || '未分配') !== assignee) return false;
+                const start = t.startDate || '1970-01-01';
+                const end = t.endDate || '2099-12-31';
+                // 任务时间段与当前季度有重叠
+                return start <= range.end && end >= range.start;
+            });
+
+            // ---- 1. 基于过滤后的 taskList 统计成员数据 ----
             let members = TEAM.filter(name => name !== '未分配').map(name => {
-                // 计算该成员的任务数据
-                const userTasks = tasks.filter(t => !t.deleted && (t.assignee || '未分配') === name);
+                const userTasks = taskList.filter(t => (t.assignee || '未分配') === name);
                 const total = userTasks.length;
                 const done = userTasks.filter(t => t.completed).length;
                 const rate = total === 0 ? 0 : Math.round((done / total) * 100);
                 return { name, rate, tasks: total };
-            }).sort((a, b) => b.rate - a.rate);
+            }).filter(m => m.tasks > 0) // ★ 过滤掉本季度或该筛选下没有任务的人
+              .sort((a, b) => b.rate - a.rate);
 
-            // 如果没有数据，使用模拟数据
+            // 如果没有数据，使用模拟数据（仅在完全无数据时兜底）
             if (members.length === 0) {
                 members = [
-                    { name: '宁琳', rate: 100, tasks: 3 },
-                    { name: '罗文涛', rate: 85, tasks: 2 },
-                    { name: '杨雯雯', rate: 72, tasks: 2 },
-                    { name: '马丹娜', rate: 68, tasks: 2 },
-                    { name: '黄梓菡', rate: 55, tasks: 2 },
-                    { name: '欧阳雪莹', rate: 50, tasks: 2 }
+                    { name: '暂无数据', rate: 0, tasks: 0 }
                 ];
             }
 
             // ---- 2. 更新顶部统计 ----
-            const avg = Math.round(members.reduce((s, m) => s + m.rate, 0) / members.length);
+            const avg = members.length > 0 ? Math.round(members.reduce((s, m) => s + m.rate, 0) / members.length) : 0;
             const maxRate = members[0] ? members[0].rate : 0;
             const minRate = members[members.length - 1] ? members[members.length - 1].rate : 0;
             const totalTasks = members.reduce((s, m) => s + m.tasks, 0);
@@ -24221,16 +24238,14 @@
             const container = document.getElementById('teamMemberList');
             if (!container) return;
 
-            // 清空容器，但保留其样式
+            // 清空容器
             container.innerHTML = '';
-
-            // 设置容器为 flex 列，高度 100%
             container.style.display = 'flex';
             container.style.flexDirection = 'column';
             container.style.height = '100%';
             container.style.overflow = 'hidden';
 
-            // 创建列表包裹层（占满剩余空间）
+            // 创建列表包裹层
             const listWrapper = document.createElement('div');
             listWrapper.id = 'teamMemberItems';
             listWrapper.style.cssText = 'flex:1;overflow-y:auto;padding-right:4px;';
@@ -24256,14 +24271,14 @@
                 div.onmouseover = function () { this.style.background = '#f8fafc'; };
                 div.onmouseout = function () { this.style.background = 'transparent'; };
                 div.innerHTML = `
-						<span class="dot" style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></span>
-						<span style="font-size:13px;font-weight:600;color:#0f172a;min-width:48px;">${m.name}</span>
-						<div style="flex:1;max-width:50px;height:5px;background:#eef2f6;border-radius:10px;overflow:hidden;">
-							<div style="height:100%;border-radius:10px;width:${rate}%;background:${color};transition:width 0.6s ease;"></div>
-						</div>
-						<span style="font-size:13px;font-weight:700;min-width:34px;text-align:right;color:${color};">${rate}%</span>
-						<span style="font-size:11px;color:#94a3b8;min-width:32px;text-align:right;">${m.tasks}项</span>
-					`;
+                        <span class="dot" style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+                        <span style="font-size:13px;font-weight:600;color:#0f172a;min-width:48px;">${m.name}</span>
+                        <div style="flex:1;max-width:50px;height:5px;background:#eef2f6;border-radius:10px;overflow:hidden;">
+                            <div style="height:100%;border-radius:10px;width:${rate}%;background:${color};transition:width 0.6s ease;"></div>
+                        </div>
+                        <span style="font-size:13px;font-weight:700;min-width:34px;text-align:right;color:${color};">${rate}%</span>
+                        <span style="font-size:11px;color:#94a3b8;min-width:32px;text-align:right;">${m.tasks}项</span>
+                    `;
                 listWrapper.appendChild(div);
             });
 
@@ -24275,50 +24290,42 @@
             const oldPagination = document.getElementById('teamQualityPagination');
             if (oldPagination) oldPagination.remove();
 
-            // ---- 8. 添加分页控件（与月度任务来源分析完全一致） ----
+            // ---- 8. 添加分页控件 ----
             if (totalPages > 1) {
                 const paginationDiv = document.createElement('div');
                 paginationDiv.id = 'teamQualityPagination';
                 paginationDiv.style.cssText = `
-						display: flex;
-						justify-content: center;
-						align-items: center;
-						gap: 8px;
-						padding-top: 4px;
-						margin-top: 2px;
-						border-top: 1.5px solid rgba(200, 215, 235, 0.25);
-						flex-shrink: 0;
-					`;
+                        display: flex; justify-content: center; align-items: center; gap: 8px;
+                        padding-top: 4px; margin-top: 2px;
+                        border-top: 1.5px solid rgba(200, 215, 235, 0.25); flex-shrink: 0;
+                    `;
 
-                // 生成页码按钮（与月度任务来源分析完全一致）
                 let pageButtons = '';
                 for (let i = 1; i <= totalPages; i++) {
                     const isActive = (i === teamQualityPage);
                     pageButtons += `<button onclick="teamQualityPage=${i};renderTeamQuality();" 
-							style="width:32px;height:32px;border:${isActive ? '1.5px solid #3b82f6' : '1.5px solid transparent'};border-radius:50%;background:${isActive ? '#3b82f6' : 'transparent'};cursor:pointer;font-size:13px;font-weight:${isActive ? '700' : '500'};color:${isActive ? '#ffffff' : '#64748b'};transition:all 0.25s ease;font-family:inherit;"
-							onmouseover="if(!this.classList.contains('active')){this.style.background='#f1f5f9';this.style.borderColor='#d1d5db';}"
-							onmouseout="if(!this.classList.contains('active')){this.style.background='transparent';this.style.borderColor='transparent';}">${i}</button>`;
+                            style="width:32px;height:32px;border:${isActive ? '1.5px solid #3b82f6' : '1.5px solid transparent'};border-radius:50%;background:${isActive ? '#3b82f6' : 'transparent'};cursor:pointer;font-size:13px;font-weight:${isActive ? '700' : '500'};color:${isActive ? '#ffffff' : '#64748b'};transition:all 0.25s ease;font-family:inherit;"
+                            onmouseover="if(!this.classList.contains('active')){this.style.background='#f1f5f9';this.style.borderColor='#d1d5db';}"
+                            onmouseout="if(!this.classList.contains('active')){this.style.background='transparent';this.style.borderColor='transparent';}">${i}</button>`;
                 }
 
                 paginationDiv.innerHTML = `
-						<button onclick="changeTeamQualityPage(-1)" 
-							style="padding:5px 14px;border:1.5px solid rgba(59,130,246,0.15);border-radius:20px;background:transparent;cursor:pointer;font-size:16px;font-weight:500;color:#64748b;transition:all 0.25s ease;font-family:inherit;${teamQualityPage <= 1 ? 'opacity:0.3;cursor:not-allowed;' : ''}"
-							${teamQualityPage <= 1 ? 'disabled' : ''}
-							onmouseover="if(!this.disabled){this.style.background='#f1f5f9';this.style.borderColor='#3b82f6';}"
-							onmouseout="if(!this.disabled){this.style.background='transparent';this.style.borderColor='rgba(59,130,246,0.15)';}">‹</button>
-						${pageButtons}
-						<button onclick="changeTeamQualityPage(1)" 
-							style="padding:5px 14px;border:1.5px solid rgba(59,130,246,0.15);border-radius:20px;background:transparent;cursor:pointer;font-size:16px;font-weight:500;color:#64748b;transition:all 0.25s ease;font-family:inherit;${teamQualityPage >= totalPages ? 'opacity:0.3;cursor:not-allowed;' : ''}"
-							${teamQualityPage >= totalPages ? 'disabled' : ''}
-							onmouseover="if(!this.disabled){this.style.background='#f1f5f9';this.style.borderColor='#3b82f6';}"
-							onmouseout="if(!this.disabled){this.style.background='transparent';this.style.borderColor='rgba(59,130,246,0.15)';}">›</button>
-					`;
-
-
+                        <button onclick="changeTeamQualityPage(-1)" 
+                            style="padding:5px 14px;border:1.5px solid rgba(59,130,246,0.15);border-radius:20px;background:transparent;cursor:pointer;font-size:16px;font-weight:500;color:#64748b;transition:all 0.25s ease;font-family:inherit;${teamQualityPage <= 1 ? 'opacity:0.3;cursor:not-allowed;' : ''}"
+                            ${teamQualityPage <= 1 ? 'disabled' : ''}
+                            onmouseover="if(!this.disabled){this.style.background='#f1f5f9';this.style.borderColor='#3b82f6';}"
+                            onmouseout="if(!this.disabled){this.style.background='transparent';this.style.borderColor='rgba(59,130,246,0.15)';}">‹</button>
+                        ${pageButtons}
+                        <button onclick="changeTeamQualityPage(1)" 
+                            style="padding:5px 14px;border:1.5px solid rgba(59,130,246,0.15);border-radius:20px;background:transparent;cursor:pointer;font-size:16px;font-weight:500;color:#64748b;transition:all 0.25s ease;font-family:inherit;${teamQualityPage >= totalPages ? 'opacity:0.3;cursor:not-allowed;' : ''}"
+                            ${teamQualityPage >= totalPages ? 'disabled' : ''}
+                            onmouseover="if(!this.disabled){this.style.background='#f1f5f9';this.style.borderColor='#3b82f6';}"
+                            onmouseout="if(!this.disabled){this.style.background='transparent';this.style.borderColor='rgba(59,130,246,0.15)';}">›</button>
+                    `;
                 container.appendChild(paginationDiv);
             }
 
-            // ---- 9. 环形图（保持不变） ----
+            // ---- 9. 环形图 ----
             const canvas = document.getElementById('teamQualityDonut');
             if (canvas) {
                 if (window.teamDonutInstance) {
@@ -24372,31 +24379,29 @@
 
         // ---- 团队完成质量分页切换 ----
         function changeTeamQualityPage(delta) {
-            // 从 TEAM 数组获取所有成员（排除未分配）
-            let members = TEAM.filter(name => name !== '未分配').map(name => {
-                const userTasks = tasks.filter(t => !t.deleted && (t.assignee || '未分配') === name);
-                const total = userTasks.length;
-                const done = userTasks.filter(t => t.completed).length;
-                const rate = total === 0 ? 0 : Math.round((done / total) * 100);
-                return { name, rate, tasks: total };
-            }).sort((a, b) => b.rate - a.rate);
+            // ★ 核心修复：分页切换时，直接复用 renderTeamQuality 的最新逻辑
+            // 不需要手动计算 totalPages，因为 renderTeamQuality 会重新计算并渲染
+            // 但我们在这里仍然需要判断边界，所以提前获取当前过滤后的成员总数
+            const range = getModeRange(currentMode);
+            const assignee = assigneeFilter || 'all';
+            const taskList = tasks.filter(t => {
+                if (t.deleted) return false;
+                if (assignee !== 'all' && (t.assignee || '未分配') !== assignee) return false;
+                const start = t.startDate || '1970-01-01';
+                const end = t.endDate || '2099-12-31';
+                return start <= range.end && end >= range.start;
+            });
 
-            if (members.length === 0) {
-                members = [
-                    { name: '宁琳', rate: 100, tasks: 3 },
-                    { name: '罗文涛', rate: 85, tasks: 2 },
-                    { name: '杨雯雯', rate: 72, tasks: 2 },
-                    { name: '马丹娜', rate: 68, tasks: 2 },
-                    { name: '黄梓菡', rate: 55, tasks: 2 },
-                    { name: '欧阳雪莹', rate: 50, tasks: 2 }
-                ];
-            }
+            const memberCount = TEAM.filter(name => name !== '未分配').filter(name => {
+                return taskList.filter(t => (t.assignee || '未分配') === name).length > 0;
+            }).length;
 
-            const totalPages = Math.ceil(members.length / TEAM_QUALITY_PAGE_SIZE) || 1;
+            const totalPages = Math.ceil(memberCount / TEAM_QUALITY_PAGE_SIZE) || 1;
             const newPage = teamQualityPage + delta;
             if (newPage < 1 || newPage > totalPages) return;
+            
             teamQualityPage = newPage;
-            renderTeamQuality();
+            renderTeamQuality(); // 重新触发渲染
         }
 
 
