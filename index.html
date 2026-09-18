@@ -24185,19 +24185,8 @@
         // ★★★ 团队完成质量渲染（本季度专用） ★★★
         // ================================================================
         function renderTeamQuality() {
-            // ★ 核心修复1：获取当前季度的日期范围
-            const range = getModeRange(currentMode); // currentMode 此时是 'quarter'
-            const assignee = assigneeFilter || 'all';
-
-            // ★ 核心修复2：在统计前，严格过滤任务（未删除、属于本季度、符合负责人筛选）
-            const taskList = tasks.filter(t => {
-                if (t.deleted) return false;
-                if (assignee !== 'all' && (t.assignee || '未分配') !== assignee) return false;
-                const start = t.startDate || '1970-01-01';
-                const end = t.endDate || '2099-12-31';
-                // 任务时间段与当前季度有重叠
-                return start <= range.end && end >= range.start;
-            });
+            // ★ 核心修复：直接调用系统统一的过滤函数，自动同步当前视图、口径（statsMode）和负责人筛选
+            const taskList = getFilteredTasks(currentMode);
 
             // ---- 1. 基于过滤后的 taskList 统计成员数据 ----
             let members = TEAM.filter(name => name !== '未分配').map(name => {
@@ -24206,10 +24195,10 @@
                 const done = userTasks.filter(t => t.completed).length;
                 const rate = total === 0 ? 0 : Math.round((done / total) * 100);
                 return { name, rate, tasks: total };
-            }).filter(m => m.tasks > 0) // ★ 过滤掉本季度或该筛选下没有任务的人
+            }).filter(m => m.tasks > 0) // 过滤掉本季度或该筛选下没有任务的人
               .sort((a, b) => b.rate - a.rate);
 
-            // 如果没有数据，使用模拟数据（仅在完全无数据时兜底）
+            // 如果没有数据，使用模拟数据兜底
             if (members.length === 0) {
                 members = [
                     { name: '暂无数据', rate: 0, tasks: 0 }
@@ -24225,6 +24214,7 @@
             document.getElementById('teamAvgRate').textContent = avg + '%';
             document.getElementById('teamMaxRate').textContent = maxRate + '%';
             document.getElementById('teamMinRate').textContent = minRate + '%';
+            // ★ 这里更新底部的总任务数，确保和左侧卡片一致
             document.getElementById('teamTotalTasks').textContent = totalTasks;
             document.getElementById('teamChange').textContent = '+5%';
 
@@ -24238,14 +24228,12 @@
             const container = document.getElementById('teamMemberList');
             if (!container) return;
 
-            // 清空容器
             container.innerHTML = '';
             container.style.display = 'flex';
             container.style.flexDirection = 'column';
             container.style.height = '100%';
             container.style.overflow = 'hidden';
 
-            // 创建列表包裹层
             const listWrapper = document.createElement('div');
             listWrapper.id = 'teamMemberItems';
             listWrapper.style.cssText = 'flex:1;overflow-y:auto;padding-right:4px;';
@@ -24379,21 +24367,10 @@
 
         // ---- 团队完成质量分页切换 ----
         function changeTeamQualityPage(delta) {
-            // ★ 核心修复：分页切换时，直接复用 renderTeamQuality 的最新逻辑
-            // 不需要手动计算 totalPages，因为 renderTeamQuality 会重新计算并渲染
-            // 但我们在这里仍然需要判断边界，所以提前获取当前过滤后的成员总数
-            const range = getModeRange(currentMode);
-            const assignee = assigneeFilter || 'all';
-            const taskList = tasks.filter(t => {
-                if (t.deleted) return false;
-                if (assignee !== 'all' && (t.assignee || '未分配') !== assignee) return false;
-                const start = t.startDate || '1970-01-01';
-                const end = t.endDate || '2099-12-31';
-                return start <= range.end && end >= range.start;
-            });
-
+            // 直接调用 renderTeamQuality，它会重新读取当前视图、口径和负责人，自动计算分页边界
+            const currentList = getFilteredTasks(currentMode);
             const memberCount = TEAM.filter(name => name !== '未分配').filter(name => {
-                return taskList.filter(t => (t.assignee || '未分配') === name).length > 0;
+                return currentList.filter(t => (t.assignee || '未分配') === name).length > 0;
             }).length;
 
             const totalPages = Math.ceil(memberCount / TEAM_QUALITY_PAGE_SIZE) || 1;
@@ -24401,7 +24378,7 @@
             if (newPage < 1 || newPage > totalPages) return;
             
             teamQualityPage = newPage;
-            renderTeamQuality(); // 重新触发渲染
+            renderTeamQuality(); 
         }
 
 
