@@ -790,6 +790,14 @@
             font-weight: 500;
             color: #475569;
             margin-top: 2px;
+            white-space: nowrap; /* ★ 绝对禁止换行 */
+            letter-spacing: -0.5px; /* 稍微收紧字间距，多塞点数字 */
+            max-width: 90px; /* 限制最大宽度，防止撑开圆环 */
+            overflow: hidden;
+            text-overflow: ellipsis; /* 如果实在长到爆，用省略号兜底 */
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .card-rate .gauge-item .label-row {
@@ -20811,6 +20819,17 @@
             return y + '-' + m + '-' + day;
         }
 
+        // ★ 新增：大数字格式化（1000 -> 1.6k, 10000 -> 1.2w）
+        function formatNumberToK(num) {
+            if (num >= 10000) {
+                return (num / 10000).toFixed(1) + 'w'; // 万
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k'; // 千
+            }
+            return num;
+        }
+
         function getModeRange(mode) {
             var todayStr = today();
             var d = new Date(todayStr);
@@ -22802,7 +22821,13 @@
 
             // ---- 更新计划完成率圆环（圆环内只放百分比和分数，角标移到外部） ----
             document.getElementById('pctDeadline').innerHTML = planRate + '<small>%</small>';
-            document.getElementById('fracDeadline').textContent = planDone + ' / ' + planTotal;
+            
+            // ★ 计划完成率：应用缩写 + 悬停显示精确数据
+            const fracDeadlineEl = document.getElementById('fracDeadline');
+            if (fracDeadlineEl) {
+                fracDeadlineEl.textContent = formatNumberToK(planDone) + ' / ' + formatNumberToK(planTotal) + ' 项';
+                fracDeadlineEl.setAttribute('title', `精确数据：${planDone} / ${planTotal} 项`);
+            }
 
             // ★★★ 通用：把 change 和 badge 合并到同一行 ★★★
             function ensureGaugeFooterRow(gaugeItem) {
@@ -22899,7 +22924,13 @@
 
             // ---- 更新实际完成率圆环 ----
             document.getElementById('pctActual').innerHTML = actualRate + '<small>%</small>';
-            document.getElementById('fracActual').textContent = actualDone + ' / ' + planTotal;
+            
+            // ★ 实际完成率：应用缩写 + 悬停显示精确数据
+            const fracActualEl = document.getElementById('fracActual');
+            if (fracActualEl) {
+                fracActualEl.textContent = formatNumberToK(actualDone) + ' / ' + formatNumberToK(planTotal) + ' 项';
+                fracActualEl.setAttribute('title', `精确数据：${actualDone} / ${planTotal} 项`);
+            }
 
             const arcActual = document.getElementById('arcActual');
             // ★★★ 修复：圆环视觉上最多填满 100%，超过 100% 也显示满环 ★★★
