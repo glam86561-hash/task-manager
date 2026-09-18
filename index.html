@@ -37748,23 +37748,36 @@
                         const rawData = JSON.parse(ev.target.result);
                         let taskArray = null;
 
-                        // 尝试多种常见格式
+                        // 1. 尝试提取成员和来源数据
+                        if (rawData.team && Array.isArray(rawData.team)) {
+                            TEAM.length = 0;
+                            TEAM.push(...rawData.team);
+                            localStorage.setItem('quadrant_team_v1', JSON.stringify(TEAM));
+                            console.log('✅ 已恢复成员数据:', TEAM.length, '人');
+                        }
+                        if (rawData.sources && Array.isArray(rawData.sources)) {
+                            taskSources.length = 0;
+                            taskSources.push(...rawData.sources);
+                            localStorage.setItem('quadrant_task_sources_v1', JSON.stringify(taskSources));
+                            console.log('✅ 已恢复来源数据:', taskSources.length, '项');
+                        }
+                        // 恢复 nextId（如果存在）
+                        if (rawData.nextId) {
+                            nextId = Math.max(nextId, rawData.nextId);
+                        }
+
+                        // 2. 提取任务数据
                         if (Array.isArray(rawData)) {
-                            // 格式1: 直接是数组
-                            taskArray = rawData;
+                            taskArray = rawData; // 兼容旧版纯数组导出
                         } else if (rawData.tasks && Array.isArray(rawData.tasks)) {
-                            // 格式2: { tasks: [...] }
-                            taskArray = rawData.tasks;
+                            taskArray = rawData.tasks; // 新版导出的 { tasks: [...] }
                         } else if (rawData.data && Array.isArray(rawData.data)) {
-                            // 格式3: { data: [...] }
                             taskArray = rawData.data;
                         } else if (rawData.items && Array.isArray(rawData.items)) {
-                            // 格式4: { items: [...] }
                             taskArray = rawData.items;
                         } else {
-                            // 尝试找第一个数组类型的值
                             for (let key in rawData) {
-                                if (Array.isArray(rawData[key]) && rawData[key].length > 0) {
+                                if (Array.isArray(rawData[key]) && rawData[key].length > 0 && typeof rawData[key][0] === 'object' && rawData[key][0].name) {
                                     taskArray = rawData[key];
                                     break;
                                 }
@@ -37772,13 +37785,16 @@
                         }
 
                         if (!taskArray || taskArray.length === 0) {
-                            toast('⚠️ 未找到任务数据，请确保JSON包含任务列表');
+                            // 就算没有任务，也刷新一下成员和来源的界面
+                            renderSettingsMembers();
+                            renderSettingsSources();
+                            renderAll();
+                            toast('⚠️ 未找到任务数据，但已同步成员和来源配置');
                             return;
                         }
 
                         // 映射为与xlsx导入兼容的格式
                         const mapped = taskArray.map((item, idx) => {
-                            // 支持多种字段名
                             const name = item.name || item.title || '';
                             return {
                                 _row: idx,
@@ -37798,12 +37814,20 @@
                         }).filter(t => t.name);
 
                         if (mapped.length === 0) {
-                            toast('⚠️ 未能解析出有效任务，请检查字段名');
+                            renderSettingsMembers();
+                            renderSettingsSources();
+                            renderAll();
+                            toast('⚠️ 未能解析出有效任务，但已同步成员和来源配置');
                             return;
                         }
 
+                        // 刷新设置页面的成员和来源列表
+                        renderSettingsMembers();
+                        renderSettingsSources();
+                        
+                        // 打开导入预览弹窗
                         openImportModal(mapped);
-                        toast('📥 已解析 ' + mapped.length + ' 项任务');
+                        toast('📥 已解析 ' + mapped.length + ' 项任务，成员与来源已同步');
 
                     } catch (err) {
                         console.error(err);
@@ -43192,18 +43216,24 @@
         }
 
         function exportTaskJSON() {
-            const data = tasks.filter(t => !t.deleted); // 只导出未删除的
+            // ★ 核心修复：把任务、成员、来源一起打包导出
+            const data = {
+                tasks: tasks.filter(t => !t.deleted),
+                team: TEAM,
+                sources: taskSources,
+                nextId: nextId
+            };
             const json = JSON.stringify(data, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `tasks_${today()}.json`;
+            a.download = `tasks_backup_${today()}.json`;
             a.click();
             URL.revokeObjectURL(url);
             localStorage.setItem('last_backup_date', new Date().toISOString());
             localStorage.removeItem('last_backup_reminder_date');
-            toast('📤 已导出 JSON');
+            toast('📤 已导出 JSON（含成员与来源配置）');
         }
         // ★★★ 新增：暴露到全局 ★★★
         window.exportTaskJSON = exportTaskJSON;
