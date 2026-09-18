@@ -7,7 +7,7 @@
 	<!-- PWA 配置文件 -->
 	<link rel="manifest" href="manifest.json" />
 	<!-- 告诉浏览器这是一个应用 -->
-	<meta name="theme-color" content="#3b82f6" />
+	<meta name="theme-color" content="#475569" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>四象限任务工作台</title>
     <link rel="icon" href="data:,">
@@ -24214,9 +24214,41 @@
             document.getElementById('teamAvgRate').textContent = avg + '%';
             document.getElementById('teamMaxRate').textContent = maxRate + '%';
             document.getElementById('teamMinRate').textContent = minRate + '%';
-            // ★ 这里更新底部的总任务数，确保和左侧卡片一致
             document.getElementById('teamTotalTasks').textContent = totalTasks;
-            document.getElementById('teamChange').textContent = '+5%';
+
+            // ★ 核心修复：动态计算环比
+            const prevRange = getCompareList(currentMode); // 获取上一周期日期范围
+            let prevAvg = 0;
+            if (prevRange) {
+                // 获取上一周期的任务列表（自动应用当前视图、口径、负责人筛选）
+                const prevTaskList = getFilteredTasks(prevRange);
+                const prevMembers = TEAM.filter(name => name !== '未分配').map(name => {
+                    const userTasks = prevTaskList.filter(t => (t.assignee || '未分配') === name);
+                    const total = userTasks.length;
+                    const done = userTasks.filter(t => t.completed).length;
+                    const rate = total === 0 ? 0 : Math.round((done / total) * 100);
+                    return { rate, tasks: total };
+                }).filter(m => m.tasks > 0);
+                
+                if (prevMembers.length > 0) {
+                    prevAvg = Math.round(prevMembers.reduce((s, m) => s + m.rate, 0) / prevMembers.length);
+                }
+            }
+            
+            const teamChangeVal = avg - prevAvg;
+            const teamChangeEl = document.getElementById('teamChange');
+            if (teamChangeEl) {
+                if (teamChangeVal > 0) {
+                    teamChangeEl.textContent = '↑ ' + teamChangeVal + '点';
+                    teamChangeEl.style.color = '#16a34a'; // 绿色
+                } else if (teamChangeVal < 0) {
+                    teamChangeEl.textContent = '↓ ' + Math.abs(teamChangeVal) + '点';
+                    teamChangeEl.style.color = '#dc2626'; // 红色
+                } else {
+                    teamChangeEl.textContent = '→ 持平';
+                    teamChangeEl.style.color = '#94a3b8'; // 灰色
+                }
+            }
 
             // ---- 3. 更新环形图中心人数 ----
             const centerNumEl = document.getElementById('teamCenterNum');

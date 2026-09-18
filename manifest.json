@@ -4,7 +4,7 @@
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#eef2f6",
-  "theme_color": "#3b82f6",
+  "theme_color": "#475569",
   "description": "四象限任务工作台 · 专注你的任务与效率管理",
   "icons": [
     {
