@@ -5,17 +5,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<!-- PWA 配置文件 -->
-	<link rel="manifest" href="manifest.json" />
+	<link rel="manifest" href="./manifest.json" />
 	<!-- 告诉浏览器这是一个应用 -->
 	<meta name="theme-color" content="#475569" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>四象限任务工作台</title>
     <link rel="icon" href="data:,">
-    <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script
-        src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="./lib/localforage.min.js"></script>
+    <script src="./lib/chart.umd.min.js"></script>
+    <script src="./lib/xlsx.full.min.js"></script>
+    <script src="./lib/chartjs-plugin-datalabels.min.js"></script>
     <style>
    /* ================================================================
    1. 基础重置 & 全局
@@ -17387,9 +17386,9 @@
 
 
 
-        /* ================================================================
-   说明弹窗 · 全新独立容器（不影响系统其他弹窗）
-   ================================================================ */
+    /* ================================================================
+        说明弹窗 · 全新独立容器（不影响系统其他弹窗）
+    ================================================================ */
         .caliber-modal-overlay {
             display: none;
             position: fixed;
@@ -19199,13 +19198,12 @@
                     </div>
                 </div>
 
-                <!-- 底部口径说明 -->
+               <!-- 底部口径说明 -->
                 <div
                     style="margin-top:24px; padding:14px 20px; background:#f8fafc; border-radius:12px; border:1.5px solid #eef2f6; font-size:13px; color:#94a3b8; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div style="display:flex; flex-wrap:wrap; gap:8px 16px; justify-content:center; width:100%;">
-                        <span>💡 <strong>口径说明：</strong>计划完成率 = 周期内截止且<strong>按时</strong>完成 ÷ 周期内截止总数 × 100%（永远 ≤
-                            100%）</span>
-                        <span>📌 <strong>实际完成率：</strong>周期内实际完成 ÷ 周期内截止总数 × 100%（非今日视图可 > 100%，今日视图 ≤ 100%）</span>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px 16px; justify-content:center; width:100%; text-align:center; line-height:1.8;">
+                        <span>💡 <strong>计划完成率：</strong>周期内截止且<strong>按时</strong>完成 ÷ 周期内截止总数 × 100%（永远 ≤ 100%，反映<strong>排期准确性</strong>）</span>
+                        <span>📌 <strong>实际完成率：</strong>周期内实际完成<strong>（含补做历史）</strong> ÷ 周期内截止总数 × 100%（<strong style="color:#dc2626;">今日 / 非今日视图均可 &gt; 100%</strong>，反映<strong>真实完成量</strong>）</span>
                     </div>
                     <span>🔄 数据更新于 <span id="rateUpdateTime">—</span></span>
                 </div>
@@ -19444,44 +19442,42 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="label">今日任务</div>
-                            <div class="value">18 <span class="unit">项</span></div><span class="change up">↑ 3</span>
+                            <div class="value">18 <span class="unit">项</span></div>
                         </div>
                         <div class="stat-card">
                             <div class="label">已完成</div>
-                            <div class="value">12 <span class="unit">项</span></div><span class="change up">↑ 66%</span>
+                            <div class="value">12 <span class="unit">项</span></div>
                         </div>
                         <div class="stat-card">
                             <div class="label">进行中</div>
-                            <div class="value">5 <span class="unit">项</span></div><span class="change flat">→ 持平</span>
+                            <div class="value">5 <span class="unit">项</span></div>
                         </div>
                         <div class="stat-card">
                             <div class="label">超期</div>
-                            <div class="value">1 <span class="unit">项</span></div><span class="change down">↓ 1</span>
+                            <div class="value">1 <span class="unit">项</span></div>
                         </div>
                         <div class="stat-card highlight" style="position: relative; overflow: visible !important;">
                             <div class="label" style="display:flex; align-items:center; gap:6px;">
                                 今日闭环率
-                                <!-- ★★★ 修复：删除 data-tip 属性，防止触发全局的伪元素提示 ★★★ -->
                                 <span class="help-icon" onclick="event.stopPropagation();"
                                     style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,0.2);color:#ffffff;font-size:11px;font-weight:700;cursor:help;border:none;font-family:inherit;flex-shrink:0;transition:all 0.2s;"
                                     onmouseover="this.style.background='rgba(255,255,255,0.4)'"
                                     onmouseout="this.style.background='rgba(255,255,255,0.2)'">?</span>
                             </div>
                             <div class="value">71 <span class="unit">%</span></div>
-                            <span class="change">↑29 环比↑29%</span>
 
-                            <!-- ★★★ 唯一的悬浮框（绝对定位，内容完整，悬浮显示） ★★★ -->
                             <div style="position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); 
-								background: #0f172a; color: #ffffff; padding: 10px 14px; border-radius: 8px; 
-								font-size: 12px; line-height: 1.6; width: 320px; text-align: left; 
-								z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.3); pointer-events: none; 
-								opacity: 0; transition: opacity 0.2s ease;" id="rateTooltipBox">
-                                【宽口径】今日闭环率 = 今日完成 /
-                                今日全部任务。包含今日开始、今日截止、跨天进行中及超期未完成的所有任务。反映今日实际工作量消化情况，与完成率统计页的'计划/实际完成率'（窄口径）计算方式不同。
-                                <!-- 提示框上方的小三角 -->
+                                background: #0f172a; color: #ffffff; padding: 10px 14px; border-radius: 8px; 
+                                font-size: 12px; line-height: 1.6; width: 340px; text-align: left; 
+                                z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.3); pointer-events: none; 
+                                opacity: 0; transition: opacity 0.2s ease;" id="rateTooltipBox">
+                                <strong>今日闭环率（宽口径）</strong> = 今日完成 ÷ 今日涉及全部任务 × 100%<br>
+                                📌 分母包含：今日开始、今日截止、跨天进行中及超期未完成的所有任务。<br>
+                                ⚠️ 反映今日实际工作量消化情况，与完成率统计页的“计划/实际完成率”（窄口径）计算方式不同。
+                                <!-- 小三角 -->
                                 <div style="position: absolute; top: -5px; left: 50%; transform: translateX(-50%); 
-									width: 0; height: 0; border-left: 6px solid transparent; 
-									border-right: 6px solid transparent; border-bottom: 6px solid #0f172a;"></div>
+                                    width: 0; height: 0; border-left: 6px solid transparent; 
+                                    border-right: 6px solid transparent; border-bottom: 6px solid #0f172a;"></div>
                             </div>
                         </div>
                     </div>
@@ -19625,22 +19621,18 @@
                         <div class="stat-card">
                             <div class="label">本周任务</div>
                             <div class="value" id="weeklyTotalValue">11 <span class="unit">项</span></div>
-                            <span class="change up">↑ 8</span>
                         </div>
                         <div class="stat-card">
                             <div class="label">已完成</div>
                             <div class="value" id="weeklyDoneValue">5 <span class="unit">项</span></div>
-                            <span class="change up">↑ 67%</span>
                         </div>
                         <div class="stat-card">
                             <div class="label">进行中</div>
                             <div class="value" id="weeklyProgressValue">6 <span class="unit">项</span></div>
-                            <span class="change down">↓ 2</span>
                         </div>
                         <div class="stat-card">
                             <div class="label">超期</div>
                             <div class="value" id="weeklyOverdueValue">0 <span class="unit">项</span></div>
-                            <span class="change down">↓ 1</span>
                         </div>
                         <div class="stat-card highlight" style="position: relative; overflow: visible !important;">
                             <div class="label" style="display:flex; align-items:center; gap:6px;">
@@ -19651,19 +19643,19 @@
                                     onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.closest('.stat-card').querySelector('.weekly-tooltip').style.opacity='0';">?</span>
                             </div>
                             <div class="value" id="weeklyRateValue">45 <span class="unit">%</span></div>
-                            <span class="change">↑ 5%</span>
 
-                            <!-- 新增的 Tooltip（与日报样式一致） -->
-                            <div class="weekly-tooltip" style="position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); 
-								background: #0f172a; color: #ffffff; padding: 10px 14px; border-radius: 8px; 
-								font-size: 12px; line-height: 1.6; width: 320px; text-align: left; 
-								z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.3); pointer-events: none; 
-								opacity: 0; transition: opacity 0.2s ease;">
-                                【宽口径】本周任务闭环率 = 本周截止且已完成（含按时、超期、延期完成）的任务数 ÷ 本周截止任务总数 ×
-                                100%。包含本周开始、跨天进行中及超期未完成的所有任务。反映本周排期任务的最终关闭情况，与完成率统计页的'计划/实际完成率'（窄口径）计算方式不同。
-                                <div style="position: absolute; top: -5px; left: 50%; transform: translateX(-50%); 
-									width: 0; height: 0; border-left: 6px solid transparent; 
-									border-right: 6px solid transparent; border-bottom: 6px solid #0f172a;"></div>
+                            <!-- 周报 Tooltip（已改为右对齐，防止截断） -->
+                            <div class="weekly-tooltip" style="position: absolute; top: calc(100% + 8px); right: -10px; 
+                                background: #0f172a; color: #ffffff; padding: 10px 14px; border-radius: 8px; 
+                                font-size: 12px; line-height: 1.6; width: 340px; text-align: left; 
+                                z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.3); pointer-events: none; 
+                                opacity: 0; transition: opacity 0.2s ease;">
+                                <strong>本周任务闭环率</strong> = 本周截止且已完成（含按时/超期/延期） ÷ 本周截止任务总数 × 100%<br>
+                                📌 分母仅限<b>截止日在本周内</b>的任务；分子只认“已完成”，不区分完成质量。<br>
+                                ⚠️ 口径与“完成率统计页”不同，反映本周排期任务的最终关闭情况。
+                                <div style="position: absolute; top: -5px; right: 30px; 
+                                    width: 0; height: 0; border-left: 6px solid transparent; 
+                                    border-right: 6px solid transparent; border-bottom: 6px solid #0f172a;"></div>
                             </div>
                         </div>
                     </div>
@@ -19838,22 +19830,18 @@
                         <div class="stat-card">
                             <div class="label">本月任务</div>
                             <div class="value" id="monthlyTotalValue">42 <span class="unit">项</span></div>
-                            <span class="change up">↑ 12%</span>
                         </div>
                         <div class="stat-card">
                             <div class="label">已完成</div>
                             <div class="value" id="monthlyDoneValue">28 <span class="unit">项</span></div>
-                            <span class="change up">↑ 71%</span>
                         </div>
                         <div class="stat-card">
                             <div class="label">进行中</div>
                             <div class="value" id="monthlyProgressValue">10 <span class="unit">项</span></div>
-                            <span class="change flat">→ 持平</span>
                         </div>
                         <div class="stat-card">
                             <div class="label">超期</div>
                             <div class="value" id="monthlyOverdueValue">4 <span class="unit">项</span></div>
-                            <span class="change down">↓ 5%</span>
                         </div>
                         <div class="stat-card highlight" style="position: relative; overflow: visible !important;">
                             <div class="label" style="display:flex; align-items:center; gap:6px;">
@@ -19864,19 +19852,19 @@
                                     onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.closest('.stat-card').querySelector('.monthly-tooltip').style.opacity='0';">?</span>
                             </div>
                             <div class="value" id="monthlyRateValue">67 <span class="unit">%</span></div>
-                            <span class="change">↑ 3%</span>
 
-                            <!-- 新增的 Tooltip（与日报样式一致） -->
-                            <div class="monthly-tooltip" style="position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); 
-								background: #0f172a; color: #ffffff; padding: 10px 14px; border-radius: 8px; 
-								font-size: 12px; line-height: 1.6; width: 320px; text-align: left; 
-								z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.3); pointer-events: none; 
-								opacity: 0; transition: opacity 0.2s ease;">
-                                【宽口径】本月任务闭环率 = 本月截止且已完成（含按时、超期、延期完成）的任务数 ÷ 本月截止任务总数 ×
-                                100%。包含本月开始、跨天进行中及超期未完成的所有任务。反映本月排期任务的最终关闭情况，与完成率统计页的'计划/实际完成率'（窄口径）计算方式不同。
-                                <div style="position: absolute; top: -5px; left: 50%; transform: translateX(-50%); 
-									width: 0; height: 0; border-left: 6px solid transparent; 
-									border-right: 6px solid transparent; border-bottom: 6px solid #0f172a;"></div>
+                            <!-- 月报 Tooltip（已改为右对齐，防止截断） -->
+                            <div class="monthly-tooltip" style="position: absolute; top: calc(100% + 8px); right: -10px; 
+                                background: #0f172a; color: #ffffff; padding: 10px 14px; border-radius: 8px; 
+                                font-size: 12px; line-height: 1.6; width: 340px; text-align: left; 
+                                z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.3); pointer-events: none; 
+                                opacity: 0; transition: opacity 0.2s ease;">
+                                <strong>本月任务闭环率</strong> = 本月截止且已完成（含按时/超期/延期） ÷ 本月截止任务总数 × 100%<br>
+                                📌 分母仅限<b>截止日在本月内</b>的任务；分子只认“已完成”，不区分完成质量。<br>
+                                ⚠️ 口径与“完成率统计页”不同，反映本月排期任务的最终关闭情况。
+                                <div style="position: absolute; top: -5px; right: 30px; 
+                                    width: 0; height: 0; border-left: 6px solid transparent; 
+                                    border-right: 6px solid transparent; border-bottom: 6px solid #0f172a;"></div>
                             </div>
                         </div>
                     </div>
@@ -22315,9 +22303,9 @@
 									<strong>完成率</strong> = 周期内实际完成数 ÷ 周期内截止总数 × 100%
 								</div>
 								<div style="font-size: 13px; color: #f59e0b; font-weight: 700; text-align: right;">
-									⚠️ 今日视图下 ≤ 100%<br>
-									⚠️ 非今日视图下可 &gt; 100%（含补做任务）
-								</div>
+                                    ⚠️ 今日视图下可 &gt; 100%（含补做任务）<br>
+                                    ⚠️ 非今日视图下可 &gt; 100%（含补做任务）
+                                </div>
 							</div>
 						</div>
 
@@ -22351,25 +22339,26 @@
 										</tr>
 										<tr>
 											<td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #0f172a;">分子</td>
-											<td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #334155; background: #f8faff;">今日实际完成数</td>
+											<td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #334155; background: #f8faff;">今日实际完成数（含补做）</td>
 											<td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #334155; background: #faf5ff;">周期内实际完成数（含补做）</td>
 										</tr>
 										<tr>
 											<td style="padding: 10px 14px; font-weight: 600; color: #0f172a;">结果</td>
-											<td style="padding: 10px 14px; color: #16a34a; font-weight: 700; background: #f8faff;">≤ 100%</td>
-											<td style="padding: 10px 14px; color: #dc2626; font-weight: 700; background: #faf5ff;">可 > 100%（含补做任务）</td>
+											<td style="padding: 10px 14px; color: #dc2626; font-weight: 700; background: #f8faff;">可 &gt; 100%（含补做任务）</td>
+                                            <td style="padding: 10px 14px; color: #dc2626; font-weight: 700; background: #faf5ff;">可 &gt; 100%（含补做任务）</td>
 										</tr>
 										<tr>
 											<td style="padding: 10px 14px; font-weight: 600; color: #0f172a;">示例</td>
-											<td style="padding: 10px 14px; color: #334155; background: #f8faff; font-size: 12px;">今日涉及 10 项，完成 9 项 → <strong>90%</strong></td>
+											<td style="padding: 10px 14px; color: #334155; background: #f8faff; font-size: 12px;">今日截止 10 项，实际完成 11 项（含补做）→ <strong>110%</strong></td>
 											<td style="padding: 10px 14px; color: #334155; background: #faf5ff; font-size: 12px;">本月截止 100 项，实际完成 118 项 → <strong>118%</strong></td>
 										</tr>
 									</tbody>
 								</table>
 							</div>
-							<div style="font-size: 12px; color: #94a3b8; margin-top: 8px; text-align: center;">
-								💡 补做任务 = 截止日期在统计周期外，但实际完成日期在统计周期内的任务
-							</div>
+							<div style="font-size: 12px; color: #94a3b8; margin-top: 8px; text-align: center; line-height: 1.6;">
+                                💡 补做任务 = 截止日期在统计周期外，但实际完成日期在统计周期内的任务<br>
+                                💡 “今日任务消化率”是另一套指标（分母为今日涉及全部任务，≤ 100%），用于反映今日工作压力，勿与“实际完成率”混淆。
+                            </div>
 						</div>
 
 						<!-- ============================================================ -->
@@ -22413,8 +22402,8 @@
 											因此今日视图反映的是「<strong>今天到期的任务，你今天真正做掉了多少</strong>」，<br>
 											而不是「今天你一共做了多少活」。<br>
 											<br>
-											⚠️ 当今日补做任务多于今日截止任务时，比率理论上可能 &gt; 100%；<br>
-											如需锁死上限为 100%，可在代码中加入 <code style="background:#f1f5f9; padding:1px 6px; border-radius:4px;">Math.min(100, ...)</code> 强制截断。
+											⚠️ 当今日补做任务多于今日截止任务时，比率理论上可能 &gt; 100%（如：今天截止5项，补做历史3项，实际完成8项，完成率=160%）；<br>
+                                            💡 <strong>注意：不建议锁死上限为 100%</strong>——补做数据是团队在还历史欠账的体现，真实暴露比隐藏更有管理价值。如确需截断，可加 <code style="background:#f1f5f9; padding:1px 6px; border-radius:4px;">Math.min(100, ...)</code>。
 										</span>
 									</div>
 								</div>
@@ -23318,13 +23307,6 @@
                 rateCard.style.display = 'flex';
                 rateCard.style.flexDirection = 'column';
                 rateCard.style.justifyContent = 'center';
-            }
-
-            if (currentMode === 'today' && !hasShownTodoToday) {
-                hasShownTodoToday = true;
-                setTimeout(function () {
-                    showAllTodoTasks();
-                }, 200);
             }
 
             // ★★★ 侧边栏“任务看板”跟随当前视图：统计当前视图下未完成的任务 ★★★
@@ -25806,51 +25788,73 @@
             }
         }
 
-
         /**
-         * 更新任务的延期状态
-         * 如果当前截止日期等于原始截止日期，则取消延期标记；
-         * 否则标记为延期（并确保 originalEndDate 存在）
+         * 更新任务的延期状态（编辑保存时调用）
+         * 规则：
+         *   1. 若不存在 originalEndDate → 从未延期，delayed = false
+         *   2. 若 endDate === originalEndDate → 改回了原日期，取消延期标记，并清空 originalEndDate
+         *   3. 若 endDate > originalEndDate → 改晚了，delayed = true
+         *   4. 若 endDate < originalEndDate → 改早了，delayed = false，但保留 originalEndDate
+         *      （因为历史原截止日仍有参考价值，且此时 completedDate <= originalEndDate 会命中「按时完成」）
          */
         function updateDelayedStatus(task) {
             if (!task) return;
-            // 如果存在原始截止日期，比较
-            if (task.originalEndDate) {
-                if (task.endDate === task.originalEndDate) {
-                    // 改回原日期，取消延期
-                    task.delayed = false;
-                    task.originalEndDate = null;
-                } else {
-                    // 当前日期不同于原始日期，标记为延期
-                    task.delayed = true;
-                }
+
+            // 从未延期过
+            if (!task.originalEndDate) {
+                task.delayed = false;
+                return;
+            }
+
+            // 改回了原始截止日 → 视为取消延期
+            if (task.endDate === task.originalEndDate) {
+                task.delayed = false;
+                task.originalEndDate = null;
+                return;
+            }
+
+            // ★★★ 核心修复：比较大小，而不是简单判断是否相等 ★★★
+            if (task.endDate > task.originalEndDate) {
+                // 改晚了 → 延期
+                task.delayed = true;
             } else {
-                // 没有原始截止日期（从未延期），肯定不是延期
+                // 改早了 → 不算延期（保留 originalEndDate 供后续判定使用）
                 task.delayed = false;
             }
         }
 
-
-        // ===== 确认延期 =====
+        // ===== 确认延期（首页/仪表盘） =====
         function confirmDefer(id) {
             const task = tasks.find(t => t.id === id);
             if (!task) return;
             const newDate = document.getElementById('deferDateInput').value;
             if (!newDate) { toast('⚠️ 请选择日期'); return; }
-            if (newDate !== task.endDate) {
-                if (!task.originalEndDate) {
-                    task.originalEndDate = task.endDate;
-                }
-                task.endDate = newDate;
-                if (task.originalEndDate && newDate > task.originalEndDate) {
-                    task.delayed = true;
-                } else {
-                    task.delayed = false;
-                }
-                toast('📅 已延期至 ' + newDate);
-            } else {
+
+            if (newDate === task.endDate) {
                 toast('📅 日期未变更');
+                return;
             }
+
+            // 首次延期：记录原始截止日
+            if (!task.originalEndDate) {
+                task.originalEndDate = task.endDate;
+            }
+
+            task.endDate = newDate;
+
+            // ★★★ 统一判定：只有新日期晚于原始截止日，才算「延期」 ★★★
+            if (task.originalEndDate && newDate > task.originalEndDate) {
+                task.delayed = true;
+            } else {
+                // 改回原日期或改得更早 → 取消延期标记
+                task.delayed = false;
+                // 若改回原日期，清空原始截止日，避免与「超期完成」判定混淆
+                if (newDate === task.originalEndDate) {
+                    task.originalEndDate = null;
+                }
+            }
+
+            toast('📅 已延期至 ' + newDate);
             saveData();
             renderAll();
 
@@ -26367,7 +26371,7 @@
                     var done = group.reduce(function (s, x) { return s + (x.deadlineDone || 0); }, 0);
                     var rate = total === 0 ? 0 : Math.round((done / total) * 100);
                     var actualCompletedSum = group.reduce(function (s, x) { return s + (x.actualCompleted || 0); }, 0);
-                    var actualRate = total === 0 ? 0 : Math.round((actualCompletedSum / total) * 100);
+                    var actualRate = total === 0 ? (actualCompletedSum > 0 ? 100 : 0) : Math.round((actualCompletedSum / total) * 100);
 
                     var label;
                     if (granularity === 'week') {
@@ -26671,7 +26675,8 @@
                             return t.completed && t.completedDate === date;
                         }).length;
                     }
-                    var actualRateVal = deadlineTotal === 0 ? 0 : Math.round((actualDoneVal / deadlineTotal) * 100);
+                    // 分母为0时，如果有实际完成数（补做），完成率记为100%，否则为0%
+                    var actualRateVal = deadlineTotal === 0 ? (actualDoneVal > 0 ? 100 : 0) : Math.round((actualDoneVal / deadlineTotal) * 100);
 
                     actualTotalArray.push(deadlineTotal);
                     actualDoneArray.push(actualDoneVal);
@@ -26844,7 +26849,7 @@
             }
 
             var actualDenom = planTotal;
-            var actualRateVal = actualDenom === 0 ? 0 : Math.round((actualDoneTotal / actualDenom) * 100);
+            var actualRateVal = actualDenom === 0 ? (actualDoneTotal > 0 ? 100 : 0) : Math.round((actualDoneTotal / actualDenom) * 100);
 
             var planChangeText, actualChangeText;
             if (isCustom || mode === 'today') {
@@ -27111,7 +27116,29 @@
 
             // ---- 根据模式决定显示数量 ----
             var displayActual, displayLabels, hasMore;
-            if (currentMode === 'month') {
+
+            // ★★★ 新增：识别自定义查询模式，优先判断，自定义时必须显示全部周期 ★★★
+            var isCustomQuery = (
+                typeof customDateRange !== 'undefined' &&
+                customDateRange &&
+                customDateRange.start &&
+                customDateRange.end
+            );
+
+            if (isCustomQuery) {
+                // ★★★ 自定义查询优先：不限制周期数，完整显示 ★★★
+                var maxDisplay = 9999;
+                hasMore = actualData.length > maxDisplay;
+                displayActual = hasMore ? actualData.slice(-maxDisplay) : actualData;
+                displayLabels = hasMore ? allLabels.slice(-maxDisplay) : allLabels;
+
+                // 自定义查询通常数据量较多，保存完整数据供必要时使用
+                window._fullRateTrendData = {
+                    labels: allLabels.slice(),
+                    actual: actualData.slice()
+                };
+
+            } else if (currentMode === 'month') {
                 // ★★★ 本月视图：显示从月初到「当前日期 + 3 天」，不跨月 ★★★
                 var todayStr = today();
                 var todayDate = new Date(todayStr);
@@ -27141,19 +27168,9 @@
                 // 如果完整数据比显示数据多，则显示「查看全部」按钮
                 hasMore = (allLabels.length > displayLabels.length);
             } else {
-                // ★★★ 新增：识别自定义查询模式，自定义时必须显示全部周期，与导出报表保持一致 ★★★
-                var isCustomQuery = (
-                    typeof customDateRange !== 'undefined' &&
-                    customDateRange &&
-                    customDateRange.start &&
-                    customDateRange.end
-                );
-
                 // 其他视图（昨日、今日、本周、上周、上月、季度、年度等）保持原逻辑
                 var maxDisplay;
-                if (isCustomQuery) {
-                    maxDisplay = 9999; // ★ 自定义模式显示全部周期（不再截断为7天）
-                } else if (currentMode === 'month' || currentMode === 'lastMonth' || currentMode === 'quarter') {
+                if (currentMode === 'month' || currentMode === 'lastMonth' || currentMode === 'quarter') {
                     maxDisplay = 9999; // 不限制，显示全部周期
                 } else if (currentMode === 'year') {
                     maxDisplay = 12;
@@ -27300,8 +27317,9 @@
                             ticks: {
                                 font: { size: 10, weight: 'bold' },
                                 color: '#1e293b',
-                                autoSkip: false,
-                                maxRotation: 30,
+                                autoSkip: true,        // ★★★ 改为 true，周期过多时自动跳过部分标签
+                                maxTicksLimit: 20,     // ★★★ 限制最多显示 20 个刻度标签，防止拥挤
+                                maxRotation: 45,       // ★★★ 允许 45 度旋转，提高可读性
                                 minRotation: 0,
                             },
                             grid: { display: false },
@@ -27673,41 +27691,66 @@
         // 7. 渲染来源完成率
         function renderRateSourceChart(sourceData, label) {
             const wrap = document.getElementById('rateSourceChartWrap');
+            const summary = document.getElementById('rateSourceSummary');
             if (!wrap) return;
+
             const keys = Object.keys(sourceData);
             const values = Object.values(sourceData);
+
+            // 无论当前有没有数据，先清空或初始化底部摘要，防止脏数据残留
+            if (summary) {
+                const strongs = summary.querySelectorAll('strong');
+                if (strongs.length >= 3) {
+                    if (!keys.length) {
+                        strongs[0].textContent = '0%';
+                        strongs[1].textContent = '—';
+                        strongs[2].textContent = '—';
+                    }
+                }
+            }
+
             if (!keys.length) {
                 wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;">暂无数据</div>';
                 return;
             }
+
             const maxVal = Math.max(...values, 1);
             let html = `<div class="combo-chart" style="position:relative;height:100%;">`;
             keys.forEach((key, i) => {
                 const pct = Math.max(4, (values[i] / maxVal) * 80);
                 const color = values[i] >= 70 ? '#22c55e' : (values[i] >= 40 ? '#3b82f6' : '#ef4444');
                 html += `<div class="bar-group" title="${key} : ${values[i]}%">
-									<div class="bar" style="height:${pct}px;background:${color};"><span class="val">${values[i]}%</span></div>
-									<span class="lbl">${key}</span>
-								</div>`;
+                            <div class="bar" style="height:${pct}px;background:${color};"><span class="val">${values[i]}%</span></div>
+                            <span class="lbl">${key}</span>
+                        </div>`;
             });
-            // ★★★ 趋势线已移除 ★★★
             html += `</div>`;
             wrap.innerHTML = html;
 
-            // 更新摘要
-            const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
-            const max = Math.max(...values);
-            const min = Math.min(...values);
-            const maxKey = keys[values.indexOf(max)];
-            const minKey = keys[values.indexOf(min)];
-
-            const summary = document.getElementById('rateSourceSummary');
+            // 动态更新底部摘要
             if (summary) {
                 const strongs = summary.querySelectorAll('strong');
                 if (strongs.length >= 3) {
+                    // 计算平均值
+                    const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+                    const max = Math.max(...values);
+                    const min = Math.min(...values);
+
                     strongs[0].textContent = avg + '%';
-                    strongs[1].textContent = maxKey + ' ' + max + '%';
-                    strongs[2].textContent = minKey + ' ' + min + '%';
+
+                    // ★★★ 核心修复：处理所有数值相等的情况 ★★★
+                    if (max === min) {
+                        // 所有来源完成率相同
+                        strongs[1].textContent = '全部 ' + max + '%';
+                        strongs[2].textContent = '—'; 
+                    } else {
+                        // 正常情况：分别查找最高和最低对应的来源名称
+                        // 如果存在多个相同的最高/最低，这里默认取第一个匹配项
+                        const maxKey = keys[values.indexOf(max)] || '—';
+                        const minKey = keys[values.indexOf(min)] || '—';
+                        strongs[1].textContent = maxKey + ' ' + max + '%';
+                        strongs[2].textContent = minKey + ' ' + min + '%';
+                    }
                 }
             }
         }
@@ -28482,14 +28525,37 @@
             // ---- 10. 更新排行榜底部统计 ----
             var rates = data.members.filter(function (m) { return m.name !== '未分配'; }).map(function (m) { return m.rate; });
             var avg = rates.length ? Math.round(rates.reduce(function (a, b) { return a + b; }, 0) / rates.length) : 0;
-            var max = rates.length ? Math.max.apply(null, rates) : 0;
-            var min = rates.length ? Math.min.apply(null, rates) : 0;
-            var maxName = data.members.find(function (m) { return m.rate === max; })?.name || '—';
-            var minName = data.members.find(function (m) { return m.rate === min; })?.name || '—';
+            
+            var maxName = '—';
+            var minName = '—';
+            var maxRateVal = 0;
+            var minRateVal = 0;
+            
+            if (rates.length > 0) {
+                maxRateVal = Math.max.apply(null, rates);
+                minRateVal = Math.min.apply(null, rates);
+                
+                if (maxRateVal === minRateVal) {
+                    // 如果最大值和最小值相同，说明全员完成率一致
+                    maxName = '全员';
+                    minName = '—';
+                } else {
+                    // 正常情况：分别查找最高和最低对应的姓名
+                    maxName = data.members.find(function (m) { return m.rate === maxRateVal; })?.name || '—';
+                    minName = data.members.find(function (m) { return m.rate === minRateVal; })?.name || '—';
+                }
+            }
 
             document.getElementById('rateTeamAvgRate').textContent = avg + '%';
-            document.getElementById('rateTeamMaxRate').textContent = maxName + ' ' + max + '%';
-            document.getElementById('rateTeamMinRate').textContent = minName + ' ' + min + '%';
+            
+            // 处理特殊情况下的显示逻辑
+            if (maxName === '全员') {
+                document.getElementById('rateTeamMaxRate').textContent = maxName + ' ' + maxRateVal + '%';
+                document.getElementById('rateTeamMinRate').textContent = '—';
+            } else {
+                document.getElementById('rateTeamMaxRate').textContent = (maxName === '—' ? '' : maxName + ' ') + maxRateVal + '%';
+                document.getElementById('rateTeamMinRate').textContent = (minName === '—' ? '' : minName + ' ') + minRateVal + '%';
+            }
 
             // ---- 11. 更新各类徽章 ----
             document.getElementById('rateRankBadge').textContent = data.label + ' · ' + data.members.length + '人';
@@ -29130,9 +29196,11 @@
 					</div>
 
 					<div class="report-footer">
-						<span>💡 口径说明：${statsMode === 'deadline' ? '📅 计划完成率 = 截止且已完成 ÷ 截止总数 × 100%' : '✅ 实际完成率 = 实际完成 ÷ 截止总数 × 100%（可 > 100%）'}</span>
-						<span>🔄 数据导出于 ${new Date().toLocaleString('zh-CN')}</span>
-					</div>
+                        <span>💡 口径说明：${statsMode === 'deadline' 
+                            ? '📅 计划完成率 = 周期内截止且按时完成 ÷ 周期内截止总数 × 100%（永远 ≤ 100%）' 
+                            : '✅ 实际完成率 = 周期内实际完成（含补做历史） ÷ 周期内截止总数 × 100%（可 > 100%）'}</span>
+                        <span>🔄 数据导出于 ${new Date().toLocaleString('zh-CN')}</span>
+                    </div>
 				</div>
 
 				\u003cscript>
@@ -32501,49 +32569,107 @@
             const ringLabelPlugin = {
                 id: 'ringLabels',
                 afterDraw(chart) {
-                    const ctx = chart.ctx;
+                    const { ctx, chartArea: { left, right, top, bottom } } = chart;
                     const meta = chart.getDatasetMeta(0);
-                    if (!meta || !meta.data || meta.data.length === 0) return;
+                    if (!meta || !meta.data) return;
+
                     const data = chart.data.datasets[0].data;
                     const total = data.reduce((a, b) => a + b, 0);
                     if (total === 0) return;
-                    const arc = meta.data[0];
-                    if (!arc || !arc.outerRadius) return;
-                    const radius = arc.outerRadius;
-                    const centerX = arc.x;
-                    const centerY = arc.y;
-                    if (isNaN(centerX) || isNaN(centerY)) return;
-                    // 有数量就显示标签（避免 1/35≈2.86% 被 3% 阈值吃掉）
-                    const minPercent = 0;
+
+                    // 1. 收集所有标签的基础信息
+                    const labels = [];
                     data.forEach((value, i) => {
                         if (value === 0) return;
-                        const pct = (value / total) * 100;
-                        if (minPercent > 0 && pct < minPercent) return;
-                        const arcMeta = meta.data[i];
-                        if (!arcMeta || arcMeta.startAngle === undefined || arcMeta.endAngle === undefined) return;
-                        const startAngle = arcMeta.startAngle;
-                        const endAngle = arcMeta.endAngle;
-                        const midAngle = startAngle + (endAngle - startAngle) / 2;
-                        const startR = radius + 2;
-                        const startX = centerX + Math.cos(midAngle) * startR;
-                        const startY = centerY + Math.sin(midAngle) * startR;
-                        const labelRadius = radius + 24;
-                        const endX = centerX + Math.cos(midAngle) * labelRadius;
-                        const endY = centerY + Math.sin(midAngle) * labelRadius;
-                        ctx.beginPath();
-                        ctx.moveTo(startX, startY);
-                        ctx.lineTo(endX, endY);
-                        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-                        ctx.lineWidth = 0.8;
-                        ctx.stroke();
-                        const labelText = chart.data.labels[i] + ' ' + value;
-                        const offsetX = Math.cos(midAngle) > 0 ? 6 : -6;
-                        ctx.fillStyle = '#0f172a';
-                        ctx.font = 'bold 12px Inter, sans-serif';
-                        ctx.textAlign = Math.cos(midAngle) > 0 ? 'left' : 'right';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(labelText, endX + offsetX, endY);
+                        const arc = meta.data[i];
+                        if (!arc) return;
+
+                        const midAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
+                        const cos = Math.cos(midAngle);
+                        const sin = Math.sin(midAngle);
+                        const isRight = cos > 0;
+
+                        const startX = arc.x + cos * (arc.outerRadius + 2);
+                        const startY = arc.y + sin * (arc.outerRadius + 2);
+
+                        const labelText = `${chart.data.labels[i]} ${value}`;
+                        
+                        // 初始的 Y 坐标
+                        const initY = arc.y + sin * (arc.outerRadius + 18);
+
+                        labels.push({
+                            index: i,
+                            text: labelText,
+                            startX, startY,
+                            initY,
+                            isRight: isRight,
+                            y: initY,
+                            x: arc.x + cos * (arc.outerRadius + 15) // 拐点
+                        });
                     });
+
+                    // 2. 分左右两组，按初始 Y 坐标排序
+                    const leftLabels = labels.filter(l => !l.isRight).sort((a, b) => a.y - b.y);
+                    const rightLabels = labels.filter(l => l.isRight).sort((a, b) => a.y - b.y);
+
+                    // 3. 防重叠推挤算法（核心）
+                    const minSpacing = 18; // 标签最小垂直间距，可根据字号微调
+                    
+                    const adjustLabels = (arr, chartTop, chartBottom) => {
+                        // 向下推挤
+                        for (let i = 1; i < arr.length; i++) {
+                            if (arr[i].y - arr[i - 1].y < minSpacing) {
+                                arr[i].y = arr[i - 1].y + minSpacing;
+                            }
+                        }
+                        // 如果底部溢出，反向向上推挤
+                        for (let i = arr.length - 2; i >= 0; i--) {
+                            if (arr[i + 1].y - arr[i].y < minSpacing) {
+                                arr[i].y = arr[i + 1].y - minSpacing;
+                            }
+                        }
+                        // 边界限制（防止跑到图表外面）
+                        arr.forEach(l => {
+                            if (l.y < chartTop + 10) l.y = chartTop + 10;
+                            if (l.y > chartBottom - 10) l.y = chartBottom - 10;
+                        });
+                    };
+
+                    adjustLabels(leftLabels, top, bottom);
+                    adjustLabels(rightLabels, top, bottom);
+
+                    // 4. 绘制折线引导线和标签文字
+                    ctx.save();
+                    ctx.font = 'bold 11px Inter, sans-serif';
+                    ctx.textBaseline = 'middle';
+
+                    const drawGuideLine = (l) => {
+                        const textX = l.isRight ? right - 5 : left + 5; // 文字贴近图表边缘
+                        const turnX = l.isRight ? right - 25 : left + 25; // 折线的拐点
+
+                        ctx.beginPath();
+                        ctx.moveTo(l.startX, l.startY);          // 1. 起点：环形图边缘
+                        ctx.lineTo(turnX, l.y);                  // 2. 斜线拉到目标高度
+                        ctx.lineTo(textX, l.y);                  // 3. 水平线拉向文字
+                        
+                        ctx.strokeStyle = 'rgba(148, 163, 184, 0.6)'; // 灰蓝色，弱化引导线
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+
+                        // 文字阴影，防止与引导线重叠看不清
+                        ctx.fillStyle = '#ffffff';
+                        ctx.textAlign = l.isRight ? 'right' : 'left';
+                        ctx.fillText(l.text, textX + 1, l.y + 1);
+                        
+                        // 文字主体
+                        ctx.fillStyle = '#0f172a';
+                        ctx.fillText(l.text, textX, l.y);
+                    };
+
+                    leftLabels.forEach(drawGuideLine);
+                    rightLabels.forEach(drawGuideLine);
+
+                    ctx.restore();
                 }
             };
 
@@ -32619,11 +32745,29 @@
                                 { idx: 4, cur: rate, prev: prevRate }
                             ];
                             changes.forEach(function (item) {
-                                var change = calcChange(item.cur, item.prev);
+                                var isRate = (item.idx === 4);
+                                var unit = isRate ? '%' : '项';
+                                var diff = item.cur - item.prev;
+                                var changeText, changeCls;
+
+                                if (item.prev === 0 && item.cur === 0) {
+                                    changeText = '→ 持平'; changeCls = 'flat';
+                                } else if (item.prev === 0 && item.cur > 0) {
+                                    changeText = '↑' + item.cur + unit + ' (新增)'; changeCls = 'up';
+                                } else if (item.prev > 0 && item.cur === 0) {
+                                    changeText = '↓' + item.prev + unit + ' (归零)'; changeCls = 'down';
+                                } else if (diff === 0) {
+                                    changeText = '→ 持平 (上期 ' + item.prev + unit + ')'; changeCls = 'flat';
+                                } else {
+                                    var arrow = diff > 0 ? '↑' : '↓';
+                                    changeText = arrow + Math.abs(diff) + unit + ' (上期 ' + item.prev + unit + ')';
+                                    changeCls = diff > 0 ? 'up' : 'down';
+                                }
+
                                 var changeEl = cards[item.idx].querySelector('.change');
                                 if (changeEl) {
-                                    changeEl.textContent = change.text;
-                                    changeEl.className = 'change ' + change.cls;
+                                    changeEl.textContent = changeText;
+                                    changeEl.className = 'change ' + changeCls;
                                 }
                             });
                         }
@@ -32823,15 +32967,22 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            cutout: '60%',
-                            radius: '80%',
-                            layout: { padding: { top: 30, bottom: 30, left: 30, right: 30 } },
+                            cutout: '60%',           // 环形内径
+                            radius: '70%',           // 缩小外径，给外部引导线留空间（原来是 80%）
+                            layout: {
+                                padding: {
+                                    top: 20,
+                                    bottom: 20,
+                                    left: 40,         // 增加左右内边距，防止左右边缘的标签文字被截断
+                                    right: 40
+                                }
+                            },
                             plugins: {
                                 legend: { display: false },
-                                datalabels: { display: false }   // ← 添加这一行
+                                datalabels: { display: false }
                             }
                         },
-                        plugins: [ringLabelPlugin]  // ← 新增
+                        plugins: [ringLabelPlugin]
                     });
                 }
 
@@ -32954,21 +33105,39 @@
                             return { text: arrow + Math.abs(diff) + ' 环比' + arrow + pct + '%', cls: cls };
                         }
 
-                        var changes = [
-                            { idx: 0, cur: weekTotal, prev: lastTotal },
-                            { idx: 1, cur: weekCompleted, prev: lastCompleted },
-                            { idx: 2, cur: weekInProgress, prev: lastInProgress },
-                            { idx: 3, cur: weekOverdue, prev: lastOverdue },
-                            { idx: 4, cur: weekRate, prev: lastRate }
-                        ];
-                        changes.forEach(function (item) {
-                            var change = calcChange(item.cur, item.prev);
-                            var changeEl = cards[item.idx].querySelector('.change');
-                            if (changeEl) {
-                                changeEl.textContent = change.text;
-                                changeEl.className = 'change ' + change.cls;
-                            }
-                        });
+                                                        var changes = [
+                                { idx: 0, cur: weekTotal, prev: lastTotal },
+                                { idx: 1, cur: weekCompleted, prev: lastCompleted },
+                                { idx: 2, cur: weekInProgress, prev: lastInProgress },
+                                { idx: 3, cur: weekOverdue, prev: lastOverdue },
+                                { idx: 4, cur: weekRate, prev: lastRate }
+                            ];
+                            changes.forEach(function (item) {
+                                var isRate = (item.idx === 4);
+                                var unit = isRate ? '%' : '项';
+                                var diff = item.cur - item.prev;
+                                var changeText, changeCls;
+
+                                if (item.prev === 0 && item.cur === 0) {
+                                    changeText = '→ 持平'; changeCls = 'flat';
+                                } else if (item.prev === 0 && item.cur > 0) {
+                                    changeText = '↑' + item.cur + unit + ' (新增)'; changeCls = 'up';
+                                } else if (item.prev > 0 && item.cur === 0) {
+                                    changeText = '↓' + item.prev + unit + ' (归零)'; changeCls = 'down';
+                                } else if (diff === 0) {
+                                    changeText = '→ 持平 (上期 ' + item.prev + unit + ')'; changeCls = 'flat';
+                                } else {
+                                    var arrow = diff > 0 ? '↑' : '↓';
+                                    changeText = arrow + Math.abs(diff) + unit + ' (上期 ' + item.prev + unit + ')';
+                                    changeCls = diff > 0 ? 'up' : 'down';
+                                }
+
+                                var changeEl = cards[item.idx].querySelector('.change');
+                                if (changeEl) {
+                                    changeEl.textContent = changeText;
+                                    changeEl.className = 'change ' + changeCls;
+                                }
+                            });
                     }
 
                     // ---- 5. 跨周期任务提示（原有逻辑） ----
@@ -34189,7 +34358,7 @@
 									}
 
 									/* ---- 图表容器 ---- */
-									.chart-wrap { height: 260px !important; position: relative !important; }
+									.chart-wrap { height: 400px !important; position: relative !important; }
 									.chart-wrap canvas { width: 100% !important; height: 100% !important; }
 									.chart-wrap img { width: 100% !important; height: 100% !important; object-fit: contain !important; }
 
@@ -35984,7 +36153,7 @@
 																计划完成率
 																<span class="badge blue">截止日</span>
 															</div>
-															<div class="formula">周期内截止且已完成 ÷ 周期内截止总数 × 100%</div>
+															<div class="formula">周期内截止且按时完成（完成日 ≤ 截止日） ÷ 周期内截止总数 × 100%</div>
 															<div class="note">✅ 永远 <strong style="color:#16a34a;">≤ 100%</strong> · 反映<strong>排期准确性</strong></div>
 														</div>
 														<!-- 实际完成率 -->
@@ -35996,8 +36165,8 @@
 															</div>
 															<div class="formula">周期内实际完成数 ÷ 周期内截止总数 × 100%</div>
 															<div class="note">
-																✅ <strong>今日视图</strong>下 ≤ 100%<br>
-																⚠️ <strong>周/月等非今日视图</strong>下可 &gt; 100%（含补做）<br>
+																✅ <strong>今日视图</strong>：分母 = 今日截止数，分子 = 今日实际完成数（含补做）→ 也可 &gt; 100%<br>
+																⚠️ <strong>周/月等非今日视图</strong>：分母 = 周期内截止数，分子 = 周期内实际完成数（含补做）→ 也可 &gt; 100%<br>
 																🎯 反映<strong>该周期真实完成量相对排期截止量的比例</strong>
 															</div>
 														</div>
@@ -36012,7 +36181,8 @@
 															<div class="note">
 																✅ 仅<strong>今日视图</strong>显示<br>
 																📌 分母含今日截止 + 今日开始 + 跨天进行中 + 超期未完成<br>
-																🎯 反映<strong>今日工作压力与实际消化能力</strong>（与上方两个完成率口径不同）
+																🎯 反映<strong>今日工作压力与实际消化能力</strong><br>
+																⚠️ <strong style="color:#dc2626;">此指标与上方两个完成率口径完全不同，请勿混用</strong>
 															</div>
 														</div>
 													</div>
@@ -36051,7 +36221,7 @@
 															<div style="margin-bottom:8px;">
 																<strong>1. 工作台 · 今日完成率</strong><br>
 																· 计划：今日截止且已完成 ÷ 今日截止总数（如 1/3 = 33%）<br>
-																· 实际：今日完成数 ÷ <strong>今日涉及全部任务</strong>（含跨天/超期，如 1/5 = 20%），≤ 100%
+																· 实际：今日完成数 ÷ <strong>今日截止任务数</strong>（含补做，如 1/3 = 33%，可 &gt; 100%）
 															</div>
 															<div style="margin-bottom:8px;">
 																<strong>2. 本周任务流量 · 某一天（如周四）</strong><br>
@@ -36060,7 +36230,7 @@
 															</div>
 															<div style="margin-bottom:8px;">
 																<strong>3. 完成率统计页 · 当日</strong><br>
-																· 计划对齐今日截止；实际应对齐仪表盘今日宽分母
+																· 计划与实际完成率均对齐今日截止口径（窄分母）
 															</div>
 															<div class="tip-box" style="margin-top:8px;padding:8px 12px;border-radius:8px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:12px;">
 																💡 例：流量图周四计划=实际=33%，仪表盘今日实际=20% —— 都正确，只是分母定义不同。
@@ -36172,6 +36342,17 @@
 															</div>
 														</div>
 													</div>
+													<div class="faq-card" style="border-left-color:#8b5cf6;">
+														<div class="q">📅 「延期完成」和「超期完成」到底怎么区分？</div>
+														<div class="a">
+															<strong>区分核心：有没有改过截止日期。</strong><br><br>
+															· <strong>超期完成 🔄</strong>：任务从未延期，拖过了原截止日才完成。<br>
+															&nbsp;&nbsp;数据特征：无 originalEndDate，completedDate &gt; endDate<br><br>
+															· <strong>延期完成 📅</strong>：用户手动点过「延期」，修改了截止日，然后在<strong>新截止日附近</strong>完成。<br>
+															&nbsp;&nbsp;数据特征：有 originalEndDate，completedDate &gt; originalEndDate<br><br>
+															<span style="color:#94a3b8; font-size:12px;">💡 简单记忆：超期是"没改日期却迟了"，延期是"改了日期才完成"。</span>
+														</div>
+													</div>
 												</div>
 											</div>
 
@@ -36192,19 +36373,15 @@
 														</div>
 														<div class="status-card" style="border-left-color:#22c55e;">
 															<span class="icon">✅</span> 按时完成
-															<div class="desc">已完成 · 完成日 ≤ 截止日 · 未延期</div>
+															<div class="desc">已完成 · 有原始截止日时比对原始截止日；否则比对当前截止日 · 完成日 ≤ 截止日</div>
 														</div>
 														<div class="status-card" style="border-left-color:#f59e0b;">
 															<span class="icon">🔄</span> 超期完成
-															<div class="desc">已完成 · 完成日 &gt; 截止日 · 未延期</div>
+															<div class="desc">已完成 · 无原始截止日（从未延期）· 完成日 &gt; 当前截止日（自然拖过）</div>
 														</div>
 														<div class="status-card" style="border-left-color:#8b5cf6;">
 															<span class="icon">📅</span> 延期完成
-															<div class="desc">已完成 · 手动延期后完成</div>
-														</div>
-														<div class="status-card" style="border-left-color:#94a3b8;background:#fafbfc;">
-															<span class="icon">❓</span> 未开始
-															<div class="desc">未开始 · 开始日 &gt; 今天</div>
+															<div class="desc">已完成 · 完成日 &gt; 原始截止日（改过截止日）或 delayed 标记为 true</div>
 														</div>
 													</div>
 													<div style="padding-top:12px;border-top:1px solid #f1f5f9;">
@@ -36237,9 +36414,20 @@
 															<div class="q">📊 实际完成率什么时候会超过 100%？</div>
 															<div class="a">
 																<strong>不是永远 ≤ 100%</strong>，取决于当前视图：<br><br>
-																· <strong>今日视图</strong>：分母 = 今日涉及全部任务（截止今日 ∪ 今日完成 ∪ 超期/跨天进行中）。分子是今日完成的任务，为分母子集 → <strong>永远 ≤ 100%</strong>。<br><br>
+																· <strong>今日视图</strong>：分母 = 今日截止任务数，分子 = 今日实际完成数（含补做） → <strong>可以 &gt; 100%</strong>。<br><br>
 																· <strong>昨日 / 本周 / 本月 / 自定义等</strong>：分母 = 周期内截止任务数；分子 = 周期内实际完成数（含补做，完成日在周期内、截止日可能在周期外）。补做多时分子可大于分母 → <strong>可以 &gt; 100%</strong>。<br><br>
 																简要：今日看「当天涉及工作的完成比例」；其它周期看「真实完成量相对排期截止量」。
+															</div>
+															<div class="faq-card" style="border-left-color:#10b981;">
+																<div class="q">📌 什么是「补做任务」？为什么会让实际完成率超过 100%？</div>
+																<div class="a">
+																	<strong>补做任务</strong>：截止日期在统计周期<strong>之前</strong>，但实际完成日期<strong>落在本周期内</strong>的任务。<br><br>
+																	例如：某任务原定 08-15 完成，但一直拖延，直到本周（比如 09-18）才真正完成。<br>
+																	· 从「<strong>计划完成率</strong>」看：截止日 08-15 不在本周 → 不计入本周分子<br>
+																	· 从「<strong>实际完成率</strong>」看：完成日 09-18 在本周 → 计入本周分子<br><br>
+																	因此，如果本周补做了很多历史欠账，实际完成率就可能高于 100%。<br>
+																	<span style="color:#94a3b8; font-size:12px;">💡 补做多不一定全是坏事，说明团队在还历史欠账；但长期补做多，说明排期管理存在系统性问题。</span>
+																</div>
 															</div>
 														</div>
 														<div class="faq-card" style="border-left-color:#0ea5e9;">
@@ -36247,7 +36435,7 @@
 															<div class="a">
 																<strong>都对，分母定义不同：</strong><br><br>
 																· <strong>本周任务流量（某一天的柱子）</strong>：计划/实际都以<strong>当天截止任务数</strong>为分母。实际分子 = 当天完成数（可含补做）。无补做时，计划与实际常相同（如周四 1÷3 = 33%）。<br><br>
-																· <strong>工作台 · 今日完成率</strong>：计划 = 今日截止且已完成 ÷ 今日截止总数（如 1÷3 = 33%）；实际 = 今日完成数 ÷ <strong>今日涉及全部任务</strong>（含跨天、超期，如 1÷5 = 20%），且 ≤ 100%。<br><br>
+																· <strong>工作台 · 今日完成率</strong>：计划 = 今日截止且已完成 ÷ 今日截止总数（如 1÷3 = 33%）；实际 = 今日完成数 ÷ 今日截止总数（含补做，如 2÷3 = 67%，可 > 100%）。“本周任务流量单日柱”和“工作台今日完成率”目前口径已统一（都以当天截止数为分母），如果出现差异，只可能是因为“今日视图包含超期任务”或“补做历史任务”造成的。<br><br>
 																· <strong>完成率统计页 · 当日</strong>：计划对齐「今日截止」；实际应对齐仪表盘今日（宽分母）。<br><br>
 																流量图按「周一～周日」逐日对齐，不会用「今日宽分母」画每一天。因此同一天出现 33% 与 20% 并存是正常现象。
 															</div>
@@ -36270,7 +36458,9 @@
 														</div>
 														<div class="faq-card" style="border-left-color:#14b8a6;">
 															<div class="q">📈 环比（↑↓）是怎么算的？</div>
-															<div class="a">(当前周期值 − 上一周期值) / 上一周期值 × 100%。上一周期为 0 时显示 ↑100%。</div>
+															<div class="a"><strong>个数型（任务数、超期数）：</strong>(当前值 − 上一周期值) / 上一周期值 × 100% <br>
+                                                            <strong>百分比型（完成率）：</strong>当前完成率 − 上一周期完成率（<strong>百分点差，单位 pp</strong>）<br>
+                                                            上一周期为 0、当前周期 > 0 时，个数型显示 ↑100%（新增），百分比型显示具体 pp 差值。</div>
 														</div>
 														<div class="faq-card" style="border-left-color:#f97316;">
 															<div class="q">🔄 A 电脑的数据如何同步到 B 电脑？</div>
@@ -36398,7 +36588,7 @@
 																		<td><span class="tag deadline">计划=截止日</span></td>
 																		<td><span class="tag purple">百分点差（pp）</span></td>
 																		<td style="font-size:12px;color:#64748b;">
-																			完成率卡片：今日实际分母为今日涉及全部（≤100%）；非今日实际分母为周期内截止（可 &gt;100%）；<br>
+																			完成率卡片：今日/非今日实际分母均为周期内截止任务数（今日可含补做，可 &gt;100%）；今日任务消化率分母为今日涉及全部任务（≤100%）<br>
 																			<strong>趋势图已统一为窄口径</strong>（分母=当天截止任务数）；<br>
 																			今日视图额外显示「今日任务消化率」；完成率环比用百分点差（pp）
 																		</td>
@@ -36443,7 +36633,7 @@
 														<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 13px; color: #334155; line-height: 1.8;">
 															<div>• 任务列表 / 状态分布「总任务」：<strong>宽口径</strong>（与周期有重叠的任务，含跨天进行中）；今日视图另含超期</div>
 															<div>• 计划完成率 = 周期内截止且按时完成 ÷ 周期内截止总数（永远 ≤ 100%）</div>
-															<div>• 实际完成率：非今日 = 周期内实际完成 ÷ 周期内截止总数（可 &gt; 100%）；今日 = 今日完成 ÷ 今日涉及全部任务（≤ 100%）</div>
+															<div>• 实际完成率：非今日 = 周期内实际完成 ÷ 周期内截止总数（可 &gt; 100%）；今日 = 今日实际完成 ÷ 今日截止任务数（含补做时也可 &gt; 100%）</div>
 															<div>• <strong>完成率趋势图</strong>：已统一为<strong>窄口径</strong>（分母 = 当天截止任务数），与完成率统计页一致</div>
 															<div>• <strong>今日任务消化率</strong>：今日视图独有，分母 = 今日涉及全部任务，反映工作压力</div>
 															<div>• <strong>环比显示</strong>：完成率用百分点差（pp），个数型用相对变化率（%）</div>
@@ -36477,7 +36667,7 @@
 														<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 13px; color: #334155; line-height: 1.8;">
 															<div>• 计划完成率：分母=周期内截止任务，分子=截止且已完成（≤ 100%）</div>
 															<div>• 实际完成率（非今日）：分母=周期内截止任务，分子=周期内实际完成含补做（可 &gt; 100%）</div>
-															<div>• 实际完成率（今日）：分母=今日涉及全部任务，分子=今日完成数（≤ 100%）</div>
+															<div>• 实际完成率（今日）：分母=今日截止任务数，分子=今日完成数（含补做，可 &gt; 100%）</div>
 															<div>• 差值 = 实际完成率 − 计划完成率，反映排期与真实完成的偏差</div>
 														</div>
 													</div>
@@ -36508,7 +36698,7 @@
 																<div style="padding-top:6px; border-top:1px solid #f1f5f9;">
 																	<strong style="color:#0f172a;">2. 计划/实际完成率（窄口径）</strong> —— <span style="color:#64748b;">反映排期准确性及真实补做情况</span><br>
 																	• 分母：仅今日截止的任务（不含今日开始、跨天进行中）<br>
-																	• 计划分子：今日截止且按时完成；实际分子：今日截止实际完成（含补做）<br>
+																	• 计划分子：今日截止且按时完成；实际分子：今日实际完成数（含补做历史）<br>
 																	• 示例：今日截止6项，按时完成3项，实际完成4项。计划完成率=3/6=50%，实际完成率=4/6≈<strong style="color:#0f172a;">67%</strong>
 																</div>
 																<div style="margin-top:6px; font-size:11px; color:#94a3b8; text-align:center;">
@@ -36669,8 +36859,8 @@
                 },
                 actual: {
                     title: '✅ 实际完成率（按完成日）',
-                    definition: periodName + '内实际完成的任务数 ÷ ' + denominatorText + ' × 100%',
-                    formula: '实际完成率 = (' + periodName + '实际完成数 ÷ ' + denominatorText + ') × 100%'
+                    definition: periodName + '内实际完成的任务数（含补做历史） ÷ ' + denominatorText + ' × 100%',
+                    formula: '实际完成率 = (' + periodName + '实际完成数（含补做） ÷ ' + denominatorText + ') × 100%'
                 }
             };
 
@@ -36780,6 +36970,8 @@
                     html += '<span style="font-weight:700; color:#7c3aed;">' + aMakeup + ' 项</span>';
                     html += '<span style="color:#16a34a; font-size:12px; font-weight:600; min-width:56px; text-align:right;">✅ 计入</span>';
                     html += '</div>';
+                    // 新增：说明什么是补做历史
+                    html += '<div style="font-size:11px; color:#94a3b8; padding:2px 0 6px 20px;">💡 截止日在当前周期之前，但实际完成日在当前周期内的任务</div>';
                 }
 
                 if (notInPeriodOverdue > 0) {
@@ -36812,7 +37004,8 @@
                 html += '<div class="section-label">🎯 使用场景与说明</div>';
                 html += '<div style="font-size:13px; color:#475569; line-height:1.9; margin-bottom:4px;">📌 分母 = ' + periodName + '内截止的任务数（含跨天任务）</div>';
                 if (isTodayView) {
-                    html += '<div style="font-size:13px; color:#475569; line-height:1.9; margin-bottom:4px;">⚠️ 今日/昨日视图：分子只统计「完成日 = 当天」的任务；截止在当天但次日才完成的超期完成不计入</div>';
+                    html += '<div style="font-size:13px; color:#475569; line-height:1.9; margin-bottom:4px;">⚠️ 今日/昨日视图：分母仅统计「截止日 = 当天」的任务；分子为「完成日 = 当天」的所有任务（含补做历史）</div>';
+                    html += '<div style="font-size:13px; color:#475569; line-height:1.9; margin-bottom:4px;">📌 当今日补做任务多于今日截止任务时，实际完成率可能 &gt; 100%</div>';
                 } else {
                     html += '<div style="font-size:13px; color:#475569; line-height:1.9; margin-bottom:4px;">⚠️ 周/月/年视图：分子含补做历史任务 → 可以 &gt; 100%（反映补做历史欠账）</div>';
                 }
@@ -38659,14 +38852,21 @@
 
 
         function showAllTodoTasks() {
-            var tasks = getUncompletedTasksForCurrentView();
+            // ✅ 直接判断全局作用域下的 tasks
+            if (typeof tasks === 'undefined' || tasks.length === 0) {
+                console.warn('任务数据尚未加载完成，暂不弹出待办弹窗');
+                return; 
+            }
+
+            // ★ 重命名变量，避免与全局 tasks 冲突，杜绝变量提升陷阱
+            var uncompletedTasks = getUncompletedTasksForCurrentView();
             var modeName = MODE_NAMES[currentMode] || '今日';
             if (customDateRange && customDateRange.start && customDateRange.end) {
                 modeName = '自定义（' + customDateRange.start + ' ~ ' + customDateRange.end + '）';
             }
-            var title = '📋 ' + modeName + '待办（' + tasks.length + ' 项）';
+            var title = '📋 ' + modeName + '待办（' + uncompletedTasks.length + ' 项）';
 
-            if (tasks.length === 0) {
+            if (uncompletedTasks.length === 0) {
                 showModal(title, '<div style="padding:40px 0;text-align:center;color:#94a3b8;font-size:14px;">✅ 当前无未完成任务</div>');
                 return;
             }
@@ -38674,7 +38874,7 @@
             // ---- 负责人筛选 ----
             var assignees = [];
             var seen = {};
-            tasks.forEach(function (t) {
+            uncompletedTasks.forEach(function (t) {
                 var name = t.assignee || '未分配';
                 if (name !== '未分配' && !seen[name]) {
                     seen[name] = true;
@@ -38691,9 +38891,9 @@
             // ---- 获取过滤后的任务列表 ----
             var filteredTasks;
             if (currentAssignee === 'all') {
-                filteredTasks = tasks;
+                filteredTasks = uncompletedTasks;
             } else {
-                filteredTasks = tasks.filter(function (t) {
+                filteredTasks = uncompletedTasks.filter(function (t) {
                     return (t.assignee || '未分配') === currentAssignee;
                 });
             }
@@ -38705,358 +38905,358 @@
 
             // ---- 构建 HTML ----
             var html = `
-						<style>
-							.todo-dialog .filter-bar {
-								display: flex;
-								align-items: center;
-								justify-content: space-between;
-								flex-wrap: wrap;
-								gap: 8px 12px;
-								padding: 10px 16px;
-								background: #f8fafc;
-								border-radius: 12px;
-								margin-bottom: 14px;
-								border: 1px solid #f1f5f9;
-							}
-							.todo-dialog .filter-bar .left {
-								display: flex;
-								align-items: center;
-								gap: 8px;
-							}
-							.todo-dialog .filter-bar .left label {
-								font-size: 13px;
-								font-weight: 600;
-								color: #1e293b;
-							}
-							.todo-dialog .filter-bar .left select {
-								padding: 4px 28px 4px 12px;
-								border-radius: 16px;
-								border: 1.5px solid #e2e8f0;
-								background: #fff;
-								font-size: 13px;
-								font-family: inherit;
-								color: #0f172a;
-								cursor: pointer;
-								outline: none;
-								appearance: none;
-								background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23475669' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-								background-repeat: no-repeat;
-								background-position: right 10px center;
-								min-width: 120px;
-							}
-							.todo-dialog .filter-bar .right {
-								font-size: 13px;
-								font-weight: 500;
-								color: #64748b;
-							}
-							.todo-dialog .filter-bar .right .num {
-								font-weight: 700;
-								color: #0f172a;
-							}
-							.todo-dialog .stats-row {
-								display: grid;
-								grid-template-columns: repeat(4, 1fr);
-								gap: 6px;
-								margin-bottom: 14px;
-							}
-							.todo-dialog .stats-row .stat-block {
-								background: #ffffff;
-								border-radius: 8px;
-								padding: 10px 2px;
-								text-align: center;
-								border: 1px solid #f1f5f9;
-								box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-								transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-								cursor: default;
-								will-change: transform;
-							}
-							.todo-dialog .stats-row .stat-block:hover {
-								transform: translateY(-4px) scale(1.02);
-								box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-								border-color: #d1d5db;
-								background: #ffffff;
-							}
-							.todo-dialog .stats-row .stat-block:active {
-								transform: scale(0.96);
-							}
-							.todo-dialog .stats-row .stat-block .num {
-								font-size: 26px;
-								font-weight: 700;
-								display: block;
-								line-height: 1.2;
-							}
-							.todo-dialog .stats-row .stat-block .num.total { color: #0f172a; }
-							.todo-dialog .stats-row .stat-block .num.high { color: #ef4444; }
-							.todo-dialog .stats-row .stat-block .num.medium { color: #f59e0b; }
-							.todo-dialog .stats-row .stat-block .num.low { color: #3b82f6; }
-							.todo-dialog .stats-row .stat-block .label {
-								font-size: 14px;
-								font-weight: 500;
-								color: #94a3b8;
-								display: block;
-								margin-top: 4px;
-							}
-							.todo-dialog .stats-row .stat-block:nth-child(1) { border-top: 3px solid #4a5b8c; }
-							.todo-dialog .stats-row .stat-block:nth-child(2) { border-top: 3px solid #ef4444; }
-							.todo-dialog .stats-row .stat-block:nth-child(3) { border-top: 3px solid #f59e0b; }
-							.todo-dialog .stats-row .stat-block:nth-child(4) { border-top: 3px solid #3b82f6; }
+                                <style>
+                                    .todo-dialog .filter-bar {
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: space-between;
+                                        flex-wrap: wrap;
+                                        gap: 8px 12px;
+                                        padding: 10px 16px;
+                                        background: #f8fafc;
+                                        border-radius: 12px;
+                                        margin-bottom: 14px;
+                                        border: 1px solid #f1f5f9;
+                                    }
+                                    .todo-dialog .filter-bar .left {
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 8px;
+                                    }
+                                    .todo-dialog .filter-bar .left label {
+                                        font-size: 13px;
+                                        font-weight: 600;
+                                        color: #1e293b;
+                                    }
+                                    .todo-dialog .filter-bar .left select {
+                                        padding: 4px 28px 4px 12px;
+                                        border-radius: 16px;
+                                        border: 1.5px solid #e2e8f0;
+                                        background: #fff;
+                                        font-size: 13px;
+                                        font-family: inherit;
+                                        color: #0f172a;
+                                        cursor: pointer;
+                                        outline: none;
+                                        appearance: none;
+                                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23475669' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+                                        background-repeat: no-repeat;
+                                        background-position: right 10px center;
+                                        min-width: 120px;
+                                    }
+                                    .todo-dialog .filter-bar .right {
+                                        font-size: 13px;
+                                        font-weight: 500;
+                                        color: #64748b;
+                                    }
+                                    .todo-dialog .filter-bar .right .num {
+                                        font-weight: 700;
+                                        color: #0f172a;
+                                    }
+                                    .todo-dialog .stats-row {
+                                        display: grid;
+                                        grid-template-columns: repeat(4, 1fr);
+                                        gap: 6px;
+                                        margin-bottom: 14px;
+                                    }
+                                    .todo-dialog .stats-row .stat-block {
+                                        background: #ffffff;
+                                        border-radius: 8px;
+                                        padding: 10px 2px;
+                                        text-align: center;
+                                        border: 1px solid #f1f5f9;
+                                        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+                                        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+                                        cursor: default;
+                                        will-change: transform;
+                                    }
+                                    .todo-dialog .stats-row .stat-block:hover {
+                                        transform: translateY(-4px) scale(1.02);
+                                        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+                                        border-color: #d1d5db;
+                                        background: #ffffff;
+                                    }
+                                    .todo-dialog .stats-row .stat-block:active {
+                                        transform: scale(0.96);
+                                    }
+                                    .todo-dialog .stats-row .stat-block .num {
+                                        font-size: 26px;
+                                        font-weight: 700;
+                                        display: block;
+                                        line-height: 1.2;
+                                    }
+                                    .todo-dialog .stats-row .stat-block .num.total { color: #0f172a; }
+                                    .todo-dialog .stats-row .stat-block .num.high { color: #ef4444; }
+                                    .todo-dialog .stats-row .stat-block .num.medium { color: #f59e0b; }
+                                    .todo-dialog .stats-row .stat-block .num.low { color: #3b82f6; }
+                                    .todo-dialog .stats-row .stat-block .label {
+                                        font-size: 14px;
+                                        font-weight: 500;
+                                        color: #94a3b8;
+                                        display: block;
+                                        margin-top: 4px;
+                                    }
+                                    .todo-dialog .stats-row .stat-block:nth-child(1) { border-top: 3px solid #4a5b8c; }
+                                    .todo-dialog .stats-row .stat-block:nth-child(2) { border-top: 3px solid #ef4444; }
+                                    .todo-dialog .stats-row .stat-block:nth-child(3) { border-top: 3px solid #f59e0b; }
+                                    .todo-dialog .stats-row .stat-block:nth-child(4) { border-top: 3px solid #3b82f6; }
 
-							.todo-dialog .task-list {
-								display: flex;
-								flex-direction: column;
-								gap: 6px;
-								max-height: 400px;
-								overflow-y: auto;
-								padding-right: 4px;
-							}
-							.todo-dialog .task-list::-webkit-scrollbar {
-								width: 4px;
-							}
-							.todo-dialog .task-list::-webkit-scrollbar-track {
-								background: #f1f5f9;
-								border-radius: 8px;
-							}
-							.todo-dialog .task-list::-webkit-scrollbar-thumb {
-								background: #cbd5e1;
-								border-radius: 8px;
-							}
-							.todo-dialog .task-card {
-								display: flex;
-								align-items: center;
-								gap: 10px;
-								padding: 10px 16px;
-								margin-bottom: 2px;
-								border-radius: 8px;
-								background: #ffffff;
-								border: 1px solid #f1f5f9;
-								transition: all 0.2s;
-								cursor: pointer;
-							}
-							.todo-dialog .task-card:hover {
-								background: #f8fafc;
-								border-color: #d1d5db;
-								transform: translateX(3px);
-							}
-							.todo-dialog .task-card .dot-indicator {
-								width: 7px;
-								height: 7px;
-								border-radius: 50%;
-								flex-shrink: 0;
-							}
-							.todo-dialog .task-card .info {
-								flex: 1;
-								min-width: 0;
-							}
-							.todo-dialog .task-card .info .name {
-								font-size: 15px;
-								font-weight: 600;
-								color: #0f172a;
-								line-height: 1.3;
-							}
-							.todo-dialog .task-card .info .meta {
-								display: flex;
-								flex-wrap: wrap;
-								align-items: center;
-								gap: 4px 10px;
-								font-size: 14px;
-								color: #64748b;
-								margin-top: 4px;
-							}
-							.todo-dialog .task-card .info .meta .assignee {
-								font-weight: 500;
-								color: #334155;
-							}
-							.todo-dialog .task-card .info .meta .date {
-								color: #94a3b8;
-							}
-							.todo-dialog .task-card .badge-group {
-								display: flex;
-								align-items: center;
-								gap: 4px;
-								flex-shrink: 0;
-							}
-							.todo-dialog .task-card .badge-group .status-tag {
-								font-size: 12px;
-								font-weight: 600;
-								padding: 2px 12px;
-								border-radius: 30px;
-								white-space: nowrap;
-							}
-							.todo-dialog .task-card .badge-group .status-tag.inprogress { background: #dbeafe; color: #1d4ed8; }
-							.todo-dialog .task-card .badge-group .status-tag.overdue { background: #fecaca; color: #991b1b; }
-							.todo-dialog .task-card .badge-group .status-tag.done { background: #dcfce7; color: #16a34a; }
-							.todo-dialog .task-card .badge-group .status-tag.overdue-done { background: #fef3c7; color: #b45309; }
-							.todo-dialog .task-card .badge-group .status-tag.delayed-done { background: #ede9fe; color: #6d28d9; }
-							.todo-dialog .task-card .badge-group .urgency-tag {
-								font-size: 12px;
-								font-weight: 600;
-								padding: 2px 10px;
-								border-radius: 30px;
-								white-space: nowrap;
-								border: 1px solid transparent;
-							}
-							.todo-dialog .task-card .badge-group .urgency-tag.high { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
-							.todo-dialog .task-card .badge-group .urgency-tag.medium { background: #fffbeb; color: #b45309; border-color: #fde68a; }
-							.todo-dialog .task-card .badge-group .urgency-tag.low { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
-							.todo-dialog .task-card .progress-bar {
-								width: 40px;
-								height: 4px;
-								background: #eef2f6;
-								border-radius: 4px;
-								overflow: hidden;
-								flex-shrink: 0;
-							}
-							.todo-dialog .task-card .progress-bar .fill {
-								height: 100%;
-								border-radius: 4px;
-								transition: width 0.3s;
-							}
-							.todo-dialog .task-card .actions {
-								display: flex;
-								align-items: center;
-								gap: 4px;
-								flex-shrink: 0;
-								margin-left: 4px;
-							}
-							.todo-dialog .task-card .actions button {
-								background: transparent;
-								border: none;
-								font-size: 14px;
-								padding: 2px 4px;
-								border-radius: 4px;
-								cursor: pointer;
-								color: #94a3b8;
-								transition: all 0.2s;
-								font-family: inherit;
-								line-height: 1;
-							}
-							.todo-dialog .task-card .actions button:hover {
-								background: #f1f5f9;
-								color: #0f172a;
-							}
-							.todo-dialog .task-card .actions button.done:hover {
-								color: #22c55e;
-								background: #dcfce7;
-							}
-							.todo-dialog .task-card .actions button.edit:hover {
-								color: #3b82f6;
-							}
-							.todo-dialog .task-card .actions button.defer:hover {
-								color: #f59e0b;
-							}
-							.todo-dialog .task-card .actions button.delete:hover {
-								color: #ef4444;
-								background: #fee2e2;
-							}
-						</style>
+                                    .todo-dialog .task-list {
+                                        display: flex;
+                                        flex-direction: column;
+                                        gap: 6px;
+                                        max-height: 400px;
+                                        overflow-y: auto;
+                                        padding-right: 4px;
+                                    }
+                                    .todo-dialog .task-list::-webkit-scrollbar {
+                                        width: 4px;
+                                    }
+                                    .todo-dialog .task-list::-webkit-scrollbar-track {
+                                        background: #f1f5f9;
+                                        border-radius: 8px;
+                                    }
+                                    .todo-dialog .task-list::-webkit-scrollbar-thumb {
+                                        background: #cbd5e1;
+                                        border-radius: 8px;
+                                    }
+                                    .todo-dialog .task-card {
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 10px;
+                                        padding: 10px 16px;
+                                        margin-bottom: 2px;
+                                        border-radius: 8px;
+                                        background: #ffffff;
+                                        border: 1px solid #f1f5f9;
+                                        transition: all 0.2s;
+                                        cursor: pointer;
+                                    }
+                                    .todo-dialog .task-card:hover {
+                                        background: #f8fafc;
+                                        border-color: #d1d5db;
+                                        transform: translateX(3px);
+                                    }
+                                    .todo-dialog .task-card .dot-indicator {
+                                        width: 7px;
+                                        height: 7px;
+                                        border-radius: 50%;
+                                        flex-shrink: 0;
+                                    }
+                                    .todo-dialog .task-card .info {
+                                        flex: 1;
+                                        min-width: 0;
+                                    }
+                                    .todo-dialog .task-card .info .name {
+                                        font-size: 15px;
+                                        font-weight: 600;
+                                        color: #0f172a;
+                                        line-height: 1.3;
+                                    }
+                                    .todo-dialog .task-card .info .meta {
+                                        display: flex;
+                                        flex-wrap: wrap;
+                                        align-items: center;
+                                        gap: 4px 10px;
+                                        font-size: 14px;
+                                        color: #64748b;
+                                        margin-top: 4px;
+                                    }
+                                    .todo-dialog .task-card .info .meta .assignee {
+                                        font-weight: 500;
+                                        color: #334155;
+                                    }
+                                    .todo-dialog .task-card .info .meta .date {
+                                        color: #94a3b8;
+                                    }
+                                    .todo-dialog .task-card .badge-group {
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 4px;
+                                        flex-shrink: 0;
+                                    }
+                                    .todo-dialog .task-card .badge-group .status-tag {
+                                        font-size: 12px;
+                                        font-weight: 600;
+                                        padding: 2px 12px;
+                                        border-radius: 30px;
+                                        white-space: nowrap;
+                                    }
+                                    .todo-dialog .task-card .badge-group .status-tag.inprogress { background: #dbeafe; color: #1d4ed8; }
+                                    .todo-dialog .task-card .badge-group .status-tag.overdue { background: #fecaca; color: #991b1b; }
+                                    .todo-dialog .task-card .badge-group .status-tag.done { background: #dcfce7; color: #16a34a; }
+                                    .todo-dialog .task-card .badge-group .status-tag.overdue-done { background: #fef3c7; color: #b45309; }
+                                    .todo-dialog .task-card .badge-group .status-tag.delayed-done { background: #ede9fe; color: #6d28d9; }
+                                    .todo-dialog .task-card .badge-group .urgency-tag {
+                                        font-size: 12px;
+                                        font-weight: 600;
+                                        padding: 2px 10px;
+                                        border-radius: 30px;
+                                        white-space: nowrap;
+                                        border: 1px solid transparent;
+                                    }
+                                    .todo-dialog .task-card .badge-group .urgency-tag.high { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+                                    .todo-dialog .task-card .badge-group .urgency-tag.medium { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+                                    .todo-dialog .task-card .badge-group .urgency-tag.low { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+                                    .todo-dialog .task-card .progress-bar {
+                                        width: 40px;
+                                        height: 4px;
+                                        background: #eef2f6;
+                                        border-radius: 4px;
+                                        overflow: hidden;
+                                        flex-shrink: 0;
+                                    }
+                                    .todo-dialog .task-card .progress-bar .fill {
+                                        height: 100%;
+                                        border-radius: 4px;
+                                        transition: width 0.3s;
+                                    }
+                                    .todo-dialog .task-card .actions {
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 4px;
+                                        flex-shrink: 0;
+                                        margin-left: 4px;
+                                    }
+                                    .todo-dialog .task-card .actions button {
+                                        background: transparent;
+                                        border: none;
+                                        font-size: 14px;
+                                        padding: 2px 4px;
+                                        border-radius: 4px;
+                                        cursor: pointer;
+                                        color: #94a3b8;
+                                        transition: all 0.2s;
+                                        font-family: inherit;
+                                        line-height: 1;
+                                    }
+                                    .todo-dialog .task-card .actions button:hover {
+                                        background: #f1f5f9;
+                                        color: #0f172a;
+                                    }
+                                    .todo-dialog .task-card .actions button.done:hover {
+                                        color: #22c55e;
+                                        background: #dcfce7;
+                                    }
+                                    .todo-dialog .task-card .actions button.edit:hover {
+                                        color: #3b82f6;
+                                    }
+                                    .todo-dialog .task-card .actions button.defer:hover {
+                                        color: #f59e0b;
+                                    }
+                                    .todo-dialog .task-card .actions button.delete:hover {
+                                        color: #ef4444;
+                                        background: #fee2e2;
+                                    }
+                                </style>
 
-						<div class="todo-dialog">
-							<!-- 筛选栏 -->
-							<div class="filter-bar">
-								<div class="left">
-									<label>👤 负责人</label>
-									<select id="todoAssigneeFilter" onchange="window._todoFilterAssignee = this.value; showAllTodoTasks();">
-										<option value="all" ` + (currentAssignee === 'all' ? 'selected' : '') + `>全部（` + tasks.length + ` 项）</option>
-										` + assignees.map(function (name) {
-                var count = tasks.filter(function (t) { return (t.assignee || '未分配') === name; }).length;
-                return '<option value="' + name + '" ' + (currentAssignee === name ? 'selected' : '') + '>' + name + '（' + count + ' 项）</option>';
-            }).join('') + `
-									</select>
-								</div>
-								<div class="right">
-									共 <span class="num" id="todoFilteredCount">` + total + `</span> 项
-								</div>
-							</div>
+                                <div class="todo-dialog">
+                                    <!-- 筛选栏 -->
+                                    <div class="filter-bar">
+                                        <div class="left">
+                                            <label>👤 负责人</label>
+                                            <select id="todoAssigneeFilter" onchange="window._todoFilterAssignee = this.value; showAllTodoTasks();">
+                                                <option value="all" ` + (currentAssignee === 'all' ? 'selected' : '') + `>全部（` + uncompletedTasks.length + ` 项）</option>
+                                                ` + assignees.map(function (name) {
+                        var count = uncompletedTasks.filter(function (t) { return (t.assignee || '未分配') === name; }).length;
+                        return '<option value="' + name + '" ' + (currentAssignee === name ? 'selected' : '') + '>' + name + '（' + count + ' 项）</option>';
+                    }).join('') + `
+                                            </select>
+                                        </div>
+                                        <div class="right">
+                                            共 <span class="num" id="todoFilteredCount">` + total + `</span> 项
+                                        </div>
+                                    </div>
 
-							<!-- 统计卡片 -->
-							<div class="stats-row">
-								<div class="stat-block"><span class="num total">` + total + `</span><span class="label">📋 总任务</span></div>
-								<div class="stat-block"><span class="num high">` + high + `</span><span class="label">🔴 高</span></div>
-								<div class="stat-block"><span class="num medium">` + medium + `</span><span class="label">🟡 中</span></div>
-								<div class="stat-block"><span class="num low">` + low + `</span><span class="label">🟢 低</span></div>
-							</div>
+                                    <!-- 统计卡片 -->
+                                    <div class="stats-row">
+                                        <div class="stat-block"><span class="num total">` + total + `</span><span class="label">📋 总任务</span></div>
+                                        <div class="stat-block"><span class="num high">` + high + `</span><span class="label">🔴 高</span></div>
+                                        <div class="stat-block"><span class="num medium">` + medium + `</span><span class="label">🟡 中</span></div>
+                                        <div class="stat-block"><span class="num low">` + low + `</span><span class="label">🟢 低</span></div>
+                                    </div>
 
-							<!-- 任务列表 -->
-							<div class="task-list" id="todoTaskList">
-								` + filteredTasks.map(function (task) {
-                var st = getTaskStatus(task);
-                var statusKey = st ? st.key : 'inprogress';
-                var statusLabel = st ? st.label : '进行中';
-                var urgencyLabel = { high: '高', medium: '中', low: '低' }[task.urgency] || '中';
-                var dotColor = statusKey === 'inprogress' ? '#3b82f6' :
-                    statusKey === 'done' ? '#22c55e' :
-                        statusKey === 'overdue' ? '#ef4444' :
-                            statusKey === 'overdue-done' ? '#f59e0b' :
-                                '#8b5cf6';
-                var progressPct = Math.min(100, Math.max(0, Number(task.progress) || 0));
-                var fillColor = progressPct === 100 ? '#22c55e' :
-                    progressPct >= 70 ? '#3b82f6' :
-                        progressPct >= 40 ? '#f59e0b' : '#ef4444';
-                return `
-										<div class="task-card" onclick="showDetail(${task.id}, true)">
-											<span class="dot-indicator" style="background:${dotColor};"></span>
-											<div class="info">
-												<div class="name">${task.name}</div>
-												<div class="meta">
-													<span class="assignee">${task.assignee || '未分配'}</span>
-													<span class="date">${formatDate(task.startDate)} ~ ${formatDate(task.endDate)}</span>
-												</div>
-											</div>
-											<div class="badge-group">
-												<span class="urgency-tag ${task.urgency}">${urgencyLabel}</span>
-												<span class="status-tag ${statusKey}">${statusLabel}</span>
-												<div class="progress-bar">
-													<div class="fill" style="width: ${progressPct}%; background: ${fillColor};"></div>
-												</div>
-											</div>
-											<div class="actions" onclick="event.stopPropagation();">
-												<button class="action-btn edit" onclick="window._todoQuickAction = true; openEditTaskV3(${task.id}, false)" title="编辑">✏️</button>
-												<button class="action-btn done" onclick="window._todoQuickAction = true; toggleCompleteV3(${task.id})" title="标记完成">✅</button>
-												<button class="action-btn defer" onclick="window._todoQuickAction = true; openDeferModalV3(${task.id}, false)" title="延期">📅</button>
-												<button class="action-btn delete" onclick="window._todoQuickAction = true; deleteTaskV3(${task.id})" title="移至回收站">🗑️</button>
-											</div>
-										</div>
-									`;
-            }).join('') + `
-							</div>
-						</div>
-					`;
+                                    <!-- 任务列表 -->
+                                    <div class="task-list" id="todoTaskList">
+                                        ` + filteredTasks.map(function (task) {
+                        var st = getTaskStatus(task);
+                        var statusKey = st ? st.key : 'inprogress';
+                        var statusLabel = st ? st.label : '进行中';
+                        var urgencyLabel = { high: '高', medium: '中', low: '低' }[task.urgency] || '中';
+                        var dotColor = statusKey === 'inprogress' ? '#3b82f6' :
+                            statusKey === 'done' ? '#22c55e' :
+                                statusKey === 'overdue' ? '#ef4444' :
+                                    statusKey === 'overdue-done' ? '#f59e0b' :
+                                        '#8b5cf6';
+                        var progressPct = Math.min(100, Math.max(0, Number(task.progress) || 0));
+                        var fillColor = progressPct === 100 ? '#22c55e' :
+                            progressPct >= 70 ? '#3b82f6' :
+                                progressPct >= 40 ? '#f59e0b' : '#ef4444';
+                        return `
+                                                <div class="task-card" onclick="showDetail(${task.id}, true)">
+                                                    <span class="dot-indicator" style="background:${dotColor};"></span>
+                                                    <div class="info">
+                                                        <div class="name">${task.name}</div>
+                                                        <div class="meta">
+                                                            <span class="assignee">${task.assignee || '未分配'}</span>
+                                                            <span class="date">${formatDate(task.startDate)} ~ ${formatDate(task.endDate)}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="badge-group">
+                                                        <span class="urgency-tag ${task.urgency}">${urgencyLabel}</span>
+                                                        <span class="status-tag ${statusKey}">${statusLabel}</span>
+                                                        <div class="progress-bar">
+                                                            <div class="fill" style="width: ${progressPct}%; background: ${fillColor};"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="actions" onclick="event.stopPropagation();">
+                                                        <button class="action-btn edit" onclick="window._todoQuickAction = true; openEditTaskV3(${task.id}, false)" title="编辑">✏️</button>
+                                                        <button class="action-btn done" onclick="window._todoQuickAction = true; toggleCompleteV3(${task.id})" title="标记完成">✅</button>
+                                                        <button class="action-btn defer" onclick="window._todoQuickAction = true; openDeferModalV3(${task.id}, false)" title="延期">📅</button>
+                                                        <button class="action-btn delete" onclick="window._todoQuickAction = true; deleteTaskV3(${task.id})" title="移至回收站">🗑️</button>
+                                                    </div>
+                                                </div>
+                                            `;
+                    }).join('') + `
+                                    </div>
+                                </div>
+                            `;
 
             // 如果筛选后无任务，显示空状态
             if (filteredTasks.length === 0) {
                 html = `
-							<div class="todo-dialog">
-								<div class="filter-bar">
-									<div class="left">
-										<label>👤 负责人</label>
-										<select id="todoAssigneeFilter" onchange="window._todoFilterAssignee = this.value; showAllTodoTasks();">
-											<option value="all" ` + (currentAssignee === 'all' ? 'selected' : '') + `>全部（` + tasks.length + ` 项）</option>
-											` + assignees.map(function (name) {
-                    var count = tasks.filter(function (t) { return (t.assignee || '未分配') === name; }).length;
-                    return '<option value="' + name + '" ' + (currentAssignee === name ? 'selected' : '') + '>' + name + '（' + count + ' 项）</option>';
-                }).join('') + `
-										</select>
-									</div>
-									<div class="right">
-										共 <span class="num">0</span> 项
-									</div>
-								</div>
-								<div style="padding:30px 0;text-align:center;color:#94a3b8;">✅ 该负责人暂无未完成任务</div>
-							</div>
-						`;
+                                    <div class="todo-dialog">
+                                        <div class="filter-bar">
+                                            <div class="left">
+                                                <label>👤 负责人</label>
+                                                <select id="todoAssigneeFilter" onchange="window._todoFilterAssignee = this.value; showAllTodoTasks();">
+                                                    <option value="all" ` + (currentAssignee === 'all' ? 'selected' : '') + `>全部（` + uncompletedTasks.length + ` 项）</option>
+                                                    ` + assignees.map(function (name) {
+                            var count = uncompletedTasks.filter(function (t) { return (t.assignee || '未分配') === name; }).length;
+                            return '<option value="' + name + '" ' + (currentAssignee === name ? 'selected' : '') + '>' + name + '（' + count + ' 项）</option>';
+                        }).join('') + `
+                                                </select>
+                                            </div>
+                                            <div class="right">
+                                                共 <span class="num">0</span> 项
+                                            </div>
+                                        </div>
+                                        <div style="padding:30px 0;text-align:center;color:#94a3b8;">✅ 该负责人暂无未完成任务</div>
+                                    </div>
+                                `;
             }
 
             // 清空标题容器，设置新标题（包含自动提醒横幅）
             var titleContainer = document.getElementById('modalTitle');
             titleContainer.innerHTML = '';
             titleContainer.innerHTML = `
-						<div style="display:flex; align-items:center; gap:12px; flex:1; flex-wrap:wrap;">
-							<h3 style="margin:0; font-size:20px; font-weight:700; color:#0f172a;">` + title + `</h3>
-							<span style="margin-left:auto; display:inline-block; background:linear-gradient(135deg, #fef2f2, #fee2e2); color:#b91c1c; font-size:11px; font-weight:700; padding:2px 18px; border-radius:20px; border:1px solid #fecaca; letter-spacing:0.4px; line-height:1.8; box-shadow:0 2px 8px rgba(239,68,68,0.08);">
-								<span style="margin-right:4px;">🔔</span>自动提醒
-							</span>
-						</div>
-					`;
+                                <div style="display:flex; align-items:center; gap:12px; flex:1; flex-wrap:wrap;">
+                                    <h3 style="margin:0; font-size:20px; font-weight:700; color:#0f172a;">` + title + `</h3>
+                                    <span style="margin-left:auto; display:inline-block; background:linear-gradient(135deg, #fef2f2, #fee2e2); color:#b91c1c; font-size:11px; font-weight:700; padding:2px 18px; border-radius:20px; border:1px solid #fecaca; letter-spacing:0.4px; line-height:1.8; box-shadow:0 2px 8px rgba(239,68,68,0.08);">
+                                        <span style="margin-right:4px;">🔔</span>自动提醒
+                                    </span>
+                                </div>
+                            `;
 
             document.getElementById('modalBody').innerHTML = html;
 
@@ -39504,16 +39704,8 @@
                 if (uncompleted.length > 0) {
                     showAllTodoTasks();
                 }
-            }, 400);
+            }, 500);
         });
-
-        // ===== 新增：自动弹出当日未完成任务弹窗 =====
-        setTimeout(function () {
-            var uncompleted = getUncompletedTasksForCurrentView();
-            if (uncompleted.length > 0) {
-                showAllTodoTasks();
-            }
-        }, 400);
 
         // ================================================================
         // ★★★ 统一的模态框控制 ★★★
@@ -42505,24 +42697,42 @@
             }
         }
 
+        // ===== 确认延期（任务中心） =====
         function confirmDeferV3(id) {
-            const task = tasks.find(t => t.id === id);
+            const task = tasks.find(t => String(t.id) === String(id));
             if (!task) return;
             const newDate = document.getElementById('deferDateInputV3').value;
             if (!newDate) {
                 toast('⚠️ 请选择日期');
                 return;
             }
-            if (newDate !== task.endDate) {
-                if (!task.originalEndDate) {
-                    task.originalEndDate = task.endDate;
-                }
-                task.endDate = newDate;
-                task.delayed = true;
-                toast('📅 已延期至 ' + newDate);
-            } else {
+
+            if (newDate === task.endDate) {
                 toast('📅 日期未变更');
+                return;
             }
+
+            // 首次延期：记录原始截止日
+            if (!task.originalEndDate) {
+                task.originalEndDate = task.endDate;
+            }
+
+            task.endDate = newDate;
+
+            // ★★★ 核心修复：与首页 confirmDefer 保持完全一致的判定逻辑 ★★★
+            // 只有新日期晚于原始截止日，才算「延期」
+            if (task.originalEndDate && newDate > task.originalEndDate) {
+                task.delayed = true;
+            } else {
+                // 改回原日期或改得更早 → 取消延期标记
+                task.delayed = false;
+                // 若改回原日期，清空原始截止日，避免与「超期完成」判定混淆
+                if (newDate === task.originalEndDate) {
+                    task.originalEndDate = null;
+                }
+            }
+
+            toast('📅 已延期至 ' + newDate);
             saveData();
             refreshTaskCenter();
 
@@ -43680,8 +43890,9 @@
                 }
             });
 
-            // 执行覆盖更新（★ 包含 description ★）
+            // ==================== 覆盖更新 ====================
             toUpdate.forEach(({ task, data }) => {
+                // 1. 更新基础字段
                 task.name = data.name.trim();
                 task.description = data.description || task.description || '';
                 task.startDate = data.startDate || task.startDate;
@@ -43692,21 +43903,23 @@
                 task.progress = parseInt(data.progress) || task.progress || 0;
                 task.source = data.source || task.source || '日常工作';
 
-                // ★★★ 新增：识别导入的“延期完成”状态并强制同步内部标记 ★★★
+                // 2. 识别是否为延期完成
                 var statusText = (data.status || '').trim();
                 var isDelayed = statusText.includes('延期完成') || statusText.toLowerCase() === 'delayed-done';
+
+                // ★★★ 核心修复 1：先统一清空延期标记，避免状态残留 ★★★
+                task.delayed = false;
+                task.originalEndDate = null;
+
                 if (isDelayed) {
                     task.delayed = true;
-                    if (!task.originalEndDate) {
-                        task.originalEndDate = task.startDate || task.endDate; // 兜底
-                    }
+                    // ★★★ 核心修复 2：优先用导入的 originalEndDate，其次用导入的 endDate，最后兜底 task.endDate ★★★
+                    task.originalEndDate = data.originalEndDate || data.endDate || task.endDate;
                     task.completed = true;
                     task.completedDate = data.completedDate || task.completedDate || today();
-                } else if (statusText.includes('按时完成') || statusText.includes('超期完成')) {
-                    // 如果导入的不是延期完成，清除之前的标记（防止覆盖时状态残留）
-                    task.delayed = false;
                 }
 
+                // 3. 处理完成状态（统一入口，覆盖所有状态文案）
                 if (data.completedDate) {
                     task.completedDate = data.completedDate;
                     task.completed = true;
@@ -43715,11 +43928,18 @@
                     task.completed = true;
                     task.completedDate = task.completedDate || today();
                 }
+
+                // ★★★ 核心修复 3：若最终未完成，强制清空所有延期相关字段 ★★★
+                if (!task.completed) {
+                    task.delayed = false;
+                    task.originalEndDate = null;
+                    task.completedDate = null;
+                    task.completedAt = null;
+                }
             });
 
-            // 执行新增（★ 包含 description ★）
+            // ==================== 新增任务 ====================
             toImport.forEach(item => {
-                // ★★★ 新增：判断是否是延期完成 ★★★
                 var statusText = (item.status || '').trim();
                 var isDelayed = statusText.includes('延期完成') || statusText.toLowerCase() === 'delayed-done';
 
@@ -43737,17 +43957,27 @@
                     completedDate: null,
                     completedAt: null,
                     deleted: false,
-                    // ★★★ 核心修复：如果是延期完成，直接设为 true 并记录原始截止日 ★★★
                     delayed: isDelayed,
-                    originalEndDate: isDelayed ? (item.startDate || item.endDate) : null,
+                    // ★★★ 核心修复 4：originalEndDate 优先用导入的 originalEndDate，其次 endDate，最后 startDate ★★★
+                    originalEndDate: isDelayed
+                        ? (item.originalEndDate || item.endDate || item.startDate || today())
+                        : null,
                     source: item.source || '日常工作',
                 };
 
+                // 处理完成状态
                 if (newTask.progress === 100 || (item.status && ['已完成', 'done', '超期完成', '延期完成'].includes(item.status.trim()))) {
                     newTask.completed = true;
                     newTask.completedDate = item.completedDate || today();
                     newTask.completedAt = new Date().toISOString();
                 }
+
+                // ★★★ 核心修复 5：若最终未完成，强制清空延期字段 ★★★
+                if (!newTask.completed) {
+                    newTask.delayed = false;
+                    newTask.originalEndDate = null;
+                }
+
                 tasks.push(newTask);
             });
 
@@ -44094,6 +44324,7 @@
             </div>
         </div>
     </div>
+
 </body>
 
 <script>
