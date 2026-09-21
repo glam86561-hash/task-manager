@@ -33807,93 +33807,117 @@
 
 
             // ===== 更新复盘内容（根据当前视图和负责人筛选） =====
-            function updateReviewContent(scope) {
-                const modeMap = { daily: 'today', weekly: 'week', monthly: 'month' };
-                const mode = modeMap[scope];
-                if (!mode) return;
-                const tasks = getReportTasks(mode);  // 已应用负责人筛选
-                const total = tasks.length;
-                if (total === 0) {
-                    const reviewEl = document.getElementById(scope + 'ReviewContent');
-                    if (reviewEl) reviewEl.textContent = '当前无任务数据，请添加任务。';
-                    return;
-                }
-
-                const completed = tasks.filter(t => t.completed).length;
-                const overdue = tasks.filter(t => !t.completed && t.endDate && t.endDate < today()).length;
-                const inProgress = tasks.filter(t => !t.completed && !overdue).length;
-                const rate = Math.round((completed / total) * 100);
-
-                // ★ 修复：使用统一的状态分组函数，保证数据和UI完全一致 ★
-                const statusGroups = getStatusGroups(tasks);
-                const onTimeCompleted = statusGroups.done.length;
-                const overdueCompleted = statusGroups['overdue-done'].length;
-                const delayedCompleted = statusGroups['delayed-done'].length;
-
-                // ---- 团队负载（改为显示完成率） ----
-                const assigneeMap = {};
-                const assigneeCompleted = {};
-                tasks.forEach(t => {
-                    const assignee = t.assignee || '未分配';
-                    assigneeMap[assignee] = (assigneeMap[assignee] || 0) + 1;
-                    if (t.completed) {
-                        assigneeCompleted[assignee] = (assigneeCompleted[assignee] || 0) + 1;
+                function updateReviewContent(scope) {
+                    const modeMap = { daily: 'today', weekly: 'week', monthly: 'month' };
+                    const mode = modeMap[scope];
+                    if (!mode) return;
+                    
+                    // 获取当前视图下的任务（用于团队负载、未完成说明等宽口径统计）
+                    const tasks = getReportTasks(mode);  
+                    if (tasks.length === 0) {
+                        const reviewEl = document.getElementById(scope + 'ReviewContent');
+                        if (reviewEl) reviewEl.textContent = '当前无任务数据，请添加任务。';
+                        return;
                     }
-                });
-                const assigneeList = Object.keys(assigneeMap).filter(a => a !== '未分配');
-                let loadText = '';
-                if (assigneeList.length === 0) {
-                    loadText = '暂无任务分配。';
-                } else {
-                    const totalTasks = tasks.length;
-                    const avg = Math.round(totalTasks / assigneeList.length);
-                    loadText = '共 ' + assigneeList.length + ' 位负责人，总任务 ' + totalTasks + ' 项，人均 ' + avg + ' 项。\n';
-                    assigneeList.forEach(a => {
-                        const totalA = assigneeMap[a] || 0;
-                        const doneA = assigneeCompleted[a] || 0;
-                        const rateA = totalA === 0 ? 0 : Math.round((doneA / totalA) * 100);
-                        loadText += '  ' + a + '：' + doneA + '/' + totalA + ' 完成（' + rateA + '%）\n';
+
+                    // ================== 核心修改：与上方闭环率保持一致的口径 ==================
+                    let closedTotal = 0;
+                    let closedCompleted = 0;
+                    
+                    if (scope === 'daily') {
+                        // 日报：宽口径（今日涉及全部任务）
+                        closedTotal = tasks.length;
+                        closedCompleted = tasks.filter(t => t.completed).length;
+                    } else if (scope === 'weekly' || scope === 'monthly') {
+                        // 周报/月报：窄口径（仅统计截止日在本周期内的任务）
+                        const range = getModeRange(mode);
+                        const deadlineTasks = tasks.filter(t => t.endDate && t.endDate >= range.start && t.endDate <= range.end);
+                        closedTotal = deadlineTasks.length;
+                        closedCompleted = deadlineTasks.filter(t => t.completed).length;
+                    }
+                    
+                    const closedRate = closedTotal === 0 ? 0 : Math.round((closedCompleted / closedTotal) * 100);
+                    // ==========================================================================
+
+                    // 以下保留原有的未完成说明和团队负载统计（使用宽口径 tasks 即可）
+                    const total = tasks.length;
+                    const completed = tasks.filter(t => t.completed).length;
+                    const overdue = tasks.filter(t => !t.completed && t.endDate && t.endDate < today()).length;
+                    const inProgress = tasks.filter(t => !t.completed && !overdue).length;
+
+                    const statusGroups = getStatusGroups(tasks);
+                    const onTimeCompleted = statusGroups.done.length;
+                    const overdueCompleted = statusGroups['overdue-done'].length;
+                    const delayedCompleted = statusGroups['delayed-done'].length;
+
+                    // ---- 团队负载 ----
+                    const assigneeMap = {};
+                    const assigneeCompleted = {};
+                    tasks.forEach(t => {
+                        const assignee = t.assignee || '未分配';
+                        assigneeMap[assignee] = (assigneeMap[assignee] || 0) + 1;
+                        if (t.completed) {
+                            assigneeCompleted[assignee] = (assigneeCompleted[assignee] || 0) + 1;
+                        }
                     });
-                    loadText = loadText.trim();
-                }
+                    const assigneeList = Object.keys(assigneeMap).filter(a => a !== '未分配');
+                    let loadText = '';
+                    if (assigneeList.length === 0) {
+                        loadText = '暂无任务分配。';
+                    } else {
+                        const avg = Math.round(total / assigneeList.length);
+                        loadText = '共 ' + assigneeList.length + ' 位负责人，总任务 ' + total + ' 项，人均 ' + avg + ' 项。\n';
+                        assigneeList.forEach(a => {
+                            const totalA = assigneeMap[a] || 0;
+                            const doneA = assigneeCompleted[a] || 0;
+                            const rateA = totalA === 0 ? 0 : Math.round((doneA / totalA) * 100);
+                            loadText += '  ' + a + '：' + doneA + '/' + totalA + ' 完成（' + rateA + '%）\n';
+                        });
+                        loadText = loadText.trim();
+                    }
 
-                // ---- 生成模板文本 ----
-                const timeLabel = scope === 'daily' ? '今日' : (scope === 'weekly' ? '本周' : '本月');
-                let text = '【' + timeLabel + '概览】\n';
-                text += '共 ' + total + ' 项任务，已完成 ' + completed + ' 项，完成率 ' + rate + '%。';
-                if (overdue > 0) text += ' ⚠️ 当前有 ' + overdue + ' 项任务已超期。';
-                text += '\n\n【团队负载】\n' + loadText;
-                text += '\n\n【完成情况】\n';
-                text += '已完成 ' + completed + ' 项，其中按时完成 ' + onTimeCompleted + ' 项，超期完成 ' + overdueCompleted + ' 项，延期完成 ' + delayedCompleted + ' 项。';
-                text += '\n\n【未完成说明】\n';
-                const uncompleted = total - completed;
-                text += '剩余 ' + uncompleted + ' 项未完成，其中超期 ' + overdue + ' 项，进行中 ' + inProgress + ' 项。';
-                if (overdue > 0) text += ' 需紧急处理。';
-                text += '\n\n【工作难点】\n';
-                if (overdue > 0) {
-                    text += '超期任务较多，可能存在资源或优先级问题。';
-                } else if (rate < 50) {
-                    text += '完成率偏低，需排查效率瓶颈。';
-                } else if (uncompleted > 0) {
-                    text += '部分任务未完成，需关注进度。';
-                } else {
-                    text += '当前无明显工作难点，团队运转正常。';
-                }
-                text += '\n\n【处理措施】\n';
-                if (overdue > 0) {
-                    text += '① 协调资源优先处理已超期任务。\n② 重新评估剩余任务排期。';
-                } else if (uncompleted > 3) {
-                    text += '① 梳理剩余任务，按优先级排序。\n② 每日跟进进展，防止新增超期。';
-                } else {
-                    text += '① 保持当前节奏，适当安排技术复盘。\n② 提前规划后续工作。';
-                }
+                    // ---- 生成模板文本 ----
+                    const timeLabel = scope === 'daily' ? '今日' : (scope === 'weekly' ? '本周' : '本月');
+                    
+                    // ★ 修改了首行概览的文案和计算数字
+                    let text = '【' + timeLabel + '概览】\n';
+                    text += '共 ' + closedTotal + ' 项任务，已完成 ' + closedCompleted + ' 项，闭环率 ' + closedRate + '%。';
+                    if (overdue > 0) text += ' ⚠️ 当前有 ' + overdue + ' 项任务已超期。';
+                    
+                    text += '\n\n【团队负载】\n' + loadText;
+                    text += '\n\n【完成情况】\n';
+                    text += '已完成 ' + completed + ' 项，其中按时完成 ' + onTimeCompleted + ' 项，超期完成 ' + overdueCompleted + ' 项，延期完成 ' + delayedCompleted + ' 项。';
+                    text += '\n\n【未完成说明】\n';
+                    const uncompleted = total - completed;
+                    text += '剩余 ' + uncompleted + ' 项未完成，其中超期 ' + overdue + ' 项，进行中 ' + inProgress + ' 项。';
+                    if (overdue > 0) text += ' 需紧急处理。';
+                    
+                    text += '\n\n【工作难点】\n';
+                    if (overdue > 0) {
+                        text += '超期任务较多，可能存在资源或优先级问题。';
+                    } else if (closedRate < 50) {
+                        text += '闭环率偏低，需排查效率瓶颈。';
+                    } else if (uncompleted > 0) {
+                        text += '部分任务未完成，需关注进度。';
+                    } else {
+                        text += '当前无明显工作难点，团队运转正常。';
+                    }
+                    
+                    text += '\n\n【处理措施】\n';
+                    if (overdue > 0) {
+                        text += '① 协调资源优先处理已超期任务。\n② 重新评估剩余任务排期。';
+                    } else if (uncompleted > 3) {
+                        text += '① 梳理剩余任务，按优先级排序。\n② 每日跟进进展，防止新增超期。';
+                    } else {
+                        text += '① 保持当前节奏，适当安排技术复盘。\n② 提前规划后续工作。';
+                    }
 
-                // 更新到页面
-                const reviewEl = document.getElementById(scope + 'ReviewContent');
-                if (reviewEl) {
-                    reviewEl.textContent = text;
+                    // 更新到页面
+                    const reviewEl = document.getElementById(scope + 'ReviewContent');
+                    if (reviewEl) {
+                        reviewEl.textContent = text;
+                    }
                 }
-            }
 
 
             // ---------- 7. 视图切换 ----------
