@@ -27192,9 +27192,16 @@
             }
 
             var maxVal = Math.max.apply(null, displayActual.concat(0));
-            // ★★★ 如果 maxVal > 100，允许显示超过 100% 的值（超额完成）★★★
-            var yMax = maxVal < 100 ? 100 : Math.ceil((maxVal * 1.1) / 10) * 10;
-            if (yMax < 20) yMax = 20;
+            var yMax = Math.ceil(Math.max(maxVal * 1.1, 100) / 10) * 10;
+            var stepSize;
+            if (yMax <= 100) {
+                stepSize = 10;
+            } else if (yMax <= 200) {
+                stepSize = 20;
+            } else {
+                stepSize = Math.ceil(yMax / 10 / 5) * 5;
+            }
+            yMax = Math.ceil(yMax / stepSize) * stepSize;
 
             if (window._rateTrendChartInstance) {
                 window._rateTrendChartInstance.destroy();
@@ -27304,13 +27311,16 @@
                         y: {
                             min: 0,
                             max: yMax,
-                            ticks: {
-                                stepSize: yMax > 100 ? 20 : 10,
-                                font: { size: 9, weight: '500' },
-                                color: '#475569',
-                                callback: function (v) { return v + '%'; },
-                                maxTicksLimit: 8,
+                        ticks: {
+                            stepSize: stepSize,
+                            precision: 0,
+                            font: { size: 9, weight: '500' },
+                            color: '#475569',
+                            callback: function (v) { 
+                                if (typeof v === 'number') return Math.round(v) + '%';
+                                return v + '%';
                             },
+                        },
                             grid: { color: 'rgba(0,0,0,0.04)' },
                         },
                         x: {
@@ -27374,156 +27384,6 @@
                 }
             }, 100);
         }
-
-
-
-        // ===== 查看全部趋势图弹窗（柱形图 + 趋势线） =====
-        function showFullRateTrendChart() {
-            var data = window._fullRateTrendData;
-            if (!data || !data.labels || data.labels.length === 0) {
-                toast('⚠️ 暂无完整数据');
-                return;
-            }
-
-            var labels = data.labels;
-            var actualData = data.actual || [];
-
-            var maxVal = Math.max.apply(null, actualData.concat(0));
-            var yMax = Math.ceil(Math.max(maxVal + 5, 100) / 10) * 10;
-
-            var barColors = actualData.map(function (v) {
-                if (v >= 80) return 'rgba(34,197,94,0.65)';
-                if (v >= 55) return 'rgba(59,130,246,0.65)';
-                return 'rgba(239,68,68,0.65)';
-            });
-            var barBorderColors = actualData.map(function (v) {
-                if (v >= 80) return '#22c55e';
-                if (v >= 55) return '#3b82f6';
-                return '#ef4444';
-            });
-
-            var overlay = document.createElement('div');
-            overlay.id = 'fullRateTrendModal';
-            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;';
-            overlay.onclick = function (e) { if (e.target === this) this.remove(); };
-
-            var box = document.createElement('div');
-            box.style.cssText = 'background:#ffffff;border-radius:20px;padding:24px 28px 20px;width:92%;max-width:1000px;max-height:90vh;overflow-y:auto;position:relative;box-shadow:0 24px 80px rgba(0,0,0,0.15);';
-
-            box.innerHTML = `
-								<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1.5px solid #f1f5f9;">
-									<h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">📊 完整完成率趋势（${labels.length} 个周期）</h3>
-									<button onclick="this.closest('#fullRateTrendModal').remove()" style="border:none;background:transparent;font-size:24px;cursor:pointer;color:#94a3b8;padding:0 8px;">✕</button>
-								</div>
-								<div style="height:380px;position:relative;">
-									<canvas id="fullRateTrendCanvas"></canvas>
-								</div>
-							`;
-
-            overlay.appendChild(box);
-            document.body.appendChild(overlay);
-
-            var canvas2 = document.getElementById('fullRateTrendCanvas');
-            if (!canvas2) return;
-            var rect2 = canvas2.parentElement.getBoundingClientRect();
-            var w = rect2.width || 800;
-            var h = rect2.height || 380;
-            var dpr2 = window.devicePixelRatio || 1;
-            canvas2.width = w * dpr2;
-            canvas2.height = h * dpr2;
-            canvas2.style.width = w + 'px';
-            canvas2.style.height = h + 'px';
-
-            if (window._fullRateChartInstance) {
-                window._fullRateChartInstance.destroy();
-                window._fullRateChartInstance = null;
-            }
-
-            var datasets = [
-                {
-                    label: '实际完成率',
-                    data: actualData,
-                    type: 'bar',
-                    backgroundColor: barColors,
-                    borderColor: barBorderColors,
-                    borderWidth: 1.5,
-                    borderRadius: 4,
-                    order: 1,
-                    yAxisID: 'y',
-                },
-                {
-                    label: '趋势线',
-                    data: actualData,
-                    type: 'line',
-                    borderColor: '#8b5cf6',
-                    backgroundColor: 'rgba(139,92,246,0.05)',
-                    borderWidth: 2.5,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#8b5cf6',
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 1.5,
-                    fill: true,
-                    tension: 0.3,
-                    order: 0,
-                    yAxisID: 'y',
-                }
-            ];
-
-            window._fullRateChartInstance = new Chart(canvas2, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: datasets,
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: { padding: { top: 30, bottom: 5 } },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return context.parsed.y + '%';
-                                }
-                            }
-                        },
-                        // ★★★ 恢复 datalabels 配置 ★★★
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'top',
-                            color: '#0f172a',
-                            font: { weight: 'bold', size: 10 },
-                            formatter: function (value) {
-                                return value + '%';
-                            },
-                            offset: 2,
-                            display: function (context) {
-                                return context.datasetIndex === 0;
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            min: 0,
-                            max: yMax,
-                            ticks: {
-                                stepSize: yMax > 100 ? 20 : 10,
-                                callback: function (v) { return v + '%'; },
-                                font: { size: 11 }
-                            },
-                            grid: { color: 'rgba(0,0,0,0.05)' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { size: 11, weight: '500' }, maxRotation: 45, autoSkip: true, maxTicksLimit: 30 }
-                        }
-                    },
-                    interaction: { intersect: false, mode: 'index' }
-                }
-            });
-        }
-
 
         // 4. 渲染负责人列表
         function renderRateMemberList(members, page) {
@@ -29937,7 +29797,16 @@
 								
 								// ---- 计算图表参数 ----
 								var maxVal = Math.max.apply(null, displayTrend.concat(0));
-								var yMax = Math.ceil(Math.max(maxVal, 100) / 10) * 10 + 10;
+                                var yMax = Math.ceil(Math.max(maxVal * 1.1, 100) / 10) * 10;
+                                var stepSize;
+                                if (yMax <= 100) {
+                                    stepSize = 10;
+                                } else if (yMax <= 200) {
+                                    stepSize = 20;
+                                } else {
+                                    stepSize = Math.ceil(yMax / 10 / 5) * 5;
+                                }
+                                yMax = Math.ceil(yMax / stepSize) * stepSize;
 								var barColors = displayTrend.map(function(v) {
 									if (v >= 80) return 'rgba(34,197,94,0.65)';
 									if (v >= 55) return 'rgba(59,130,246,0.65)';
@@ -30028,12 +29897,16 @@
 											y: {
 												min: 0,
 												max: yMax,
-												ticks: {
-													stepSize: yMax > 100 ? 20 : 10,
-													callback: function(v) { return v + '%'; },
-													font: { size: 9, weight: '500' },
-													color: '#475569'
-												},
+											ticks: {
+                                                stepSize: stepSize,
+                                                precision: 0,
+                                                callback: function(v) { 
+                                                    if (typeof v === 'number') return Math.round(v) + '%';
+                                                    return v + '%';
+                                                },
+                                                font: { size: 9, weight: '500' },
+                                                color: '#475569'
+                                            },
 												grid: { color: 'rgba(0,0,0,0.04)' }
 											},
 											x: {
@@ -31236,230 +31109,6 @@
                     btn.style.color = '#64748b';
                     btn.style.boxShadow = 'none';
                 }
-            });
-
-            // ============================================================
-            // ★★★ 9. 添加“查看全部”按钮（仅当本月/上月且数据超过7天） ★★★
-            // ============================================================
-            // 移除旧的按钮
-            var oldViewAllBtn = document.getElementById('trendViewAllBtn');
-            if (oldViewAllBtn) oldViewAllBtn.remove();
-
-            if (isMonthMode && window._fullMonthlyTrendData && window._fullMonthlyTrendData.labels.length > 7) {
-                var btnContainer = document.createElement('div');
-                btnContainer.id = 'trendViewAllBtn';
-                btnContainer.style.cssText = 'text-align:center;margin-top:10px;';
-                var btn = document.createElement('button');
-                btn.textContent = '📊 查看全部 (' + window._fullMonthlyTrendData.labels.length + ' 个周期)';
-                btn.style.cssText = 'padding:4px 18px;border-radius:20px;border:1.5px solid #4b7bec;background:transparent;color:#4b7bec;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:all 0.2s;';
-                btn.onmouseover = function () { this.style.background = '#4b7bec'; this.style.color = '#fff'; };
-                btn.onmouseout = function () { this.style.background = 'transparent'; this.style.color = '#4b7bec'; };
-                btn.onclick = function () { showFullMonthlyTrend(); };
-                btnContainer.appendChild(btn);
-                // 插入到 canvas 容器后面（父容器内）
-                var parent = canvas.parentNode;
-                // 移除可能存在的旧的按钮容器
-                var oldContainer = document.getElementById('trendViewAllBtn');
-                if (oldContainer) oldContainer.remove();
-                parent.parentNode.insertBefore(btnContainer, parent.nextSibling);
-            }
-        }
-
-
-        // ================================================================
-        // ★★★ 查看完整月度趋势弹窗（柱状图 + 趋势线） ★★★
-        // ================================================================
-        function showFullMonthlyTrend() {
-            var data = window._fullMonthlyTrendData;
-            if (!data || !data.labels || data.labels.length === 0) {
-                toast('⚠️ 暂无完整数据');
-                return;
-            }
-
-            var labels = data.labels;
-            var planData = data.plan || [];
-            var actualData = data.actual || [];
-            var totalData = data.total || [];
-            var doneData = data.done || [];
-            var actualCompletedData = data.actualCompleted || [];
-
-            var allValues = planData.concat(actualData);
-            var maxVal = Math.max.apply(null, allValues.concat(0));
-            var yMax = Math.ceil(Math.max(maxVal + 5, 100) / 10) * 10;
-
-            // 柱子颜色（实际完成率）
-            var barColors = actualData.map(function (v) {
-                if (v >= 80) return 'rgba(34,197,94,0.65)';
-                if (v >= 55) return 'rgba(59,130,246,0.65)';
-                return 'rgba(239,68,68,0.65)';
-            });
-            var barBorderColors = actualData.map(function (v) {
-                if (v >= 80) return '#22c55e';
-                if (v >= 55) return '#3b82f6';
-                return '#ef4444';
-            });
-
-            // 创建弹窗
-            var overlay = document.createElement('div');
-            overlay.id = 'fullMonthlyTrendModal';
-            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;';
-            overlay.onclick = function (e) { if (e.target === this) this.remove(); };
-
-            var box = document.createElement('div');
-            box.style.cssText = 'background:#ffffff;border-radius:20px;padding:24px 28px 20px;width:92%;max-width:1000px;max-height:90vh;overflow-y:auto;position:relative;box-shadow:0 24px 80px rgba(0,0,0,0.15);';
-
-            box.innerHTML = `
-						<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1.5px solid #f1f5f9;">
-							<h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">📊 完整月度趋势（${labels.length} 个周期）</h3>
-							<button onclick="this.closest('#fullMonthlyTrendModal').remove()" style="border:none;background:transparent;font-size:24px;cursor:pointer;color:#94a3b8;padding:0 8px;">✕</button>
-						</div>
-						<div style="height:380px;position:relative;">
-							<canvas id="fullMonthlyTrendCanvas"></canvas>
-						</div>
-						<div style="display:flex;justify-content:center;gap:20px;margin-top:12px;font-size:12px;color:#94a3b8;">
-							<span><span style="display:inline-block;width:18px;height:3px;border-radius:3px;background:#3b82f6;vertical-align:middle;margin-right:4px;"></span>计划完成</span>
-							<span><span style="display:inline-block;width:20px;height:0;border-top:2.5px dashed #8b5cf6;vertical-align:middle;margin-right:4px;"></span>实际完成</span>
-						</div>
-					`;
-
-            overlay.appendChild(box);
-            document.body.appendChild(overlay);
-
-            // 绘制图表
-            var canvas2 = document.getElementById('fullMonthlyTrendCanvas');
-            if (!canvas2) return;
-            var rect2 = canvas2.parentElement.getBoundingClientRect();
-            var w = rect2.width || 800;
-            var h = rect2.height || 380;
-            var dpr2 = window.devicePixelRatio || 1;
-            canvas2.width = w * dpr2;
-            canvas2.height = h * dpr2;
-            canvas2.style.width = w + 'px';
-            canvas2.style.height = h + 'px';
-
-            if (window._fullMonthlyChartInstance) {
-                window._fullMonthlyChartInstance.destroy();
-                window._fullMonthlyChartInstance = null;
-            }
-
-            window._fullMonthlyChartInstance = new Chart(canvas2, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '实际完成率',
-                            data: actualData,
-                            type: 'bar',
-                            backgroundColor: barColors,
-                            borderColor: barBorderColors,
-                            borderWidth: 1.5,
-                            borderRadius: 4,
-                            order: 1,
-                            yAxisID: 'y',
-                        },
-                        {
-                            label: '趋势线',
-                            data: actualData,
-                            type: 'line',
-                            borderColor: '#8b5cf6',
-                            backgroundColor: 'rgba(139,92,246,0.05)',
-                            borderWidth: 2.5,
-                            pointBackgroundColor: '#8b5cf6',
-                            pointRadius: 4,
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 1.5,
-                            fill: true,
-                            tension: 0.3,
-                            order: 0,
-                            yAxisID: 'y',
-                        },
-                        {
-                            label: '计划完成',
-                            data: planData,
-                            type: 'line',
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59,130,246,0.04)',
-                            borderWidth: 2,
-                            borderDash: [5, 4],
-                            pointBackgroundColor: '#3b82f6',
-                            pointRadius: 3,
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 1,
-                            fill: true,
-                            tension: 0.3,
-                            order: 0,
-                            yAxisID: 'y',
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: { top: 35, bottom: 5 }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                boxWidth: 12,
-                                padding: 14,
-                                font: { size: 13, weight: '600' },
-                                color: '#475569'
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return context.dataset.label + ': ' + context.parsed.y + '%';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            min: 0,
-                            max: yMax,
-                            ticks: {
-                                stepSize: yMax > 100 ? 20 : 10,
-                                callback: function (v) { return v + '%'; },
-                                font: { size: 11 }
-                            },
-                            grid: { color: 'rgba(0,0,0,0.05)' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { size: 11, weight: '500' }, maxRotation: 45, autoSkip: true, maxTicksLimit: 30 }
-                        }
-                    },
-                    interaction: { intersect: false, mode: 'index' }
-                },
-                plugins: [{
-                    id: 'fullMonthlyBarLabels',
-                    afterDraw: function (chart) {
-                        var ctx3 = chart.ctx;
-                        var meta = chart.getDatasetMeta(0);
-                        if (!meta || !meta.data) return;
-                        var data = chart.data.datasets[0].data;
-                        ctx3.save();
-                        ctx3.textAlign = 'center';
-                        ctx3.textBaseline = 'bottom';
-                        ctx3.font = 'bold 9px Inter, sans-serif';
-                        meta.data.forEach(function (bar, index) {
-                            var value = data[index];
-                            if (value === 0) return;
-                            var x = bar.x;
-                            var y = bar.y - 6;
-                            if (y > 10) {
-                                ctx3.fillStyle = '#0f172a';
-                                ctx3.fillText(value + '%', x, y);
-                            }
-                        });
-                        ctx3.restore();
-                    }
-                }]
             });
         }
 
